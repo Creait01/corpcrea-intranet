@@ -44,4 +44,4 @@ COPY --from=builder /app/server-dist ./server-dist
 EXPOSE 3000
 
 # Push schema to DB (creates tables if they don't exist) then start server
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node server-dist/server/index.js"]
+CMD ["sh", "-c", "npx prisma db push && node server-dist/server/index.js"]

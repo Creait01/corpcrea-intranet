@@ -2,8 +2,19 @@ import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+let prismaInstance: PrismaClient | null = null;
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
+if (process.env.DATABASE_URL) {
+  try {
+    prismaInstance = globalForPrisma.prisma ?? new PrismaClient();
+    if (process.env.NODE_ENV !== 'production') {
+      globalForPrisma.prisma = prismaInstance;
+    }
+  } catch (e) {
+    console.warn('⚠️  Could not initialize Prisma client:', e);
+  }
+} else {
+  console.warn('⚠️  DATABASE_URL not set — database features disabled');
 }
+
+export const prisma = prismaInstance as PrismaClient;

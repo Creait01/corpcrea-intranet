@@ -169,7 +169,7 @@ router.post('/multiple', authMiddleware, upload.array('files', 10), async (req, 
 });
 
 // DELETE /api/upload/:publicId  — remove from Cloudinary
-router.delete('/:publicId(*)', authMiddleware, async (req, res) => {
+router.delete('/:publicId', authMiddleware, async (req, res) => {
   try {
     const { configured } = await configureCloudinary();
     if (!configured) {

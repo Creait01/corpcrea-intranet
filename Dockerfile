@@ -6,6 +6,7 @@ WORKDIR /app
 # Copy dependency manifests
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Install all dependencies (dev included for build)
 RUN npm ci
@@ -32,6 +33,7 @@ ENV NODE_ENV=production
 # Copy dependency manifests & install production deps only
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 RUN npm ci --omit=dev
 RUN npx prisma generate
 
@@ -41,5 +43,5 @@ COPY --from=builder /app/server-dist ./server-dist
 
 EXPOSE 3000
 
-# Run migrations then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node server-dist/server/index.js"]
+# Push schema to DB (creates tables if they don't exist) then start server
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node server-dist/server/index.js"]

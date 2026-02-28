@@ -282,7 +282,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                     {item.description}
                   </p>
                   <button onClick={() => setSelectedNews(item)} className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide">
-                    {item.type === 'VIDEO' ? <><PlayCircle size={20}/> Ver video</> : <>Leer más <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></>}
+                    Leer más <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -290,15 +290,33 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           </div>
         ))}
         
-        {/* Indicators */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-3">
-          {data.news.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentNewsIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-500 ${idx === currentNewsIndex ? 'bg-[#CBA052] w-10' : 'bg-white/30 w-2 hover:bg-white/50'}`}
-            />
-          ))}
+        {/* Bottom nav: prev arrow + dots + next arrow */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4">
+          <button
+            onClick={() => setCurrentNewsIndex((currentNewsIndex - 1 + data.news.length) % data.news.length)}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
+            aria-label="Noticia anterior"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <div className="flex items-center gap-2">
+            {data.news.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentNewsIndex(idx)}
+                className={`h-2 rounded-full transition-all duration-500 ${idx === currentNewsIndex ? 'bg-[#CBA052] w-10' : 'bg-white/30 w-2 hover:bg-white/50'}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentNewsIndex((currentNewsIndex + 1) % data.news.length)}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
+            aria-label="Siguiente noticia"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
 
         {/* Scroll indicator */}

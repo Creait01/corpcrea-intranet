@@ -118,19 +118,46 @@ export const INITIAL_CEO_MESSAGE: CeoMessageContent = {
 export const INITIAL_NEWS: NewsItem[] = [
   {
     id: '1',
-    title: 'Expansión Global 2024',
-    description: 'Corpocrea abre nuevas oficinas en Madrid y Buenos Aires.',
+    title: 'Expansión Global 2025',
+    description: 'Corpocrea abre nuevas oficinas en Madrid y Buenos Aires, consolidando su presencia latinoamericana.',
+    content: 'Estamos orgullosos de anunciar la apertura de nuestras nuevas sedes en Madrid, España y Buenos Aires, Argentina. Este hito representa el resultado de años de trabajo sostenido y la confianza depositada por nuestros clientes a nivel internacional.\n\nLas nuevas oficinas contarán con equipos especializados en diseño arquitectónico, ingeniería y proyectos BIM, brindando soporte local a los clientes de cada región. Se espera que para el cierre del año fiscal se incorporen más de 40 profesionales a ambas sedes.\n\nEl Director General destacó que esta expansión es parte del plan estratégico 2025-2030 que posiciona a Corpocrea como referente en la región hispanohablante. "Llevamos nuestra filosofía de excelencia e innovación a nuevos mercados", afirmó.',
     imageUrl: 'https://picsum.photos/1200/600?random=1',
+    additionalImages: [
+      'https://picsum.photos/1200/600?random=21',
+      'https://picsum.photos/1200/600?random=22',
+      'https://picsum.photos/1200/600?random=23',
+    ],
     type: 'IMAGE',
-    date: '2024-05-15',
+    date: '2025-05-15',
   },
   {
     id: '2',
-    title: 'Innovación Tecnológica',
-    description: 'Implementamos IA en todos nuestros procesos internos.',
+    title: 'Innovación con Inteligencia Artificial',
+    description: 'Implementamos herramientas de IA en nuestros procesos internos de diseño y gestión de proyectos.',
+    content: 'Corpocrea ha iniciado la integración de herramientas de Inteligencia Artificial en sus flujos de trabajo internos. El programa piloto, que inició en el trimestre pasado, ha arrojado resultados prometedores en términos de eficiencia y calidad de entregables.\n\nEntre las herramientas adoptadas destacan asistentes de generación de planos, revisión automatizada de documentos BIM y chatbots de soporte interno para gestión de proyectos. El equipo de IT reporta una reducción del 30% en tiempos de revisión documental.\n\nLa empresa planea extender estas capacidades a todos sus departamentos durante el siguiente semestre, con especial énfasis en las áreas de Presupuesto, Calidad y Recursos Humanos.',
     videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    imageUrl: 'https://picsum.photos/1200/600?random=5',
+    additionalImages: [
+      'https://picsum.photos/1200/600?random=31',
+      'https://picsum.photos/1200/600?random=32',
+    ],
     type: 'VIDEO',
-    date: '2024-05-10',
+    date: '2025-04-10',
+  },
+  {
+    id: '3',
+    title: 'Premio Nacional a la Excelencia en Construcción',
+    description: 'Corpocrea recibe el galardón por el proyecto Torre Diamante en la categoría de Diseño Sostenible.',
+    content: 'En una ceremonia celebrada en el Centro de Convenciones Nacional, Corpocrea recibió el Premio Nacional a la Excelencia en Construcción en la categoría de Diseño Sostenible por el proyecto Torre Diamante, un edificio de uso mixto de 32 pisos ubicado en el centro financiero de la ciudad.\n\nEl jurado destacó el uso innovador de materiales reciclados, la integración de paneles solares de última generación y el sistema de recolección de agua pluvial que reduce en un 45% el consumo hídrico del edificio. El proyecto fue liderado por nuestro Departamento de Arquitectura e Ingeniería Sostenible.\n\nEste reconocimiento se suma a los tres premios internacionales obtenidos en los últimos dos años, reafirmando el compromiso de Corpocrea con la construcción responsable y el futuro del planeta.',
+    imageUrl: 'https://picsum.photos/1200/600?random=8',
+    additionalImages: [
+      'https://picsum.photos/1200/600?random=41',
+      'https://picsum.photos/1200/600?random=42',
+      'https://picsum.photos/1200/600?random=43',
+      'https://picsum.photos/1200/600?random=44',
+    ],
+    type: 'IMAGE',
+    date: '2025-03-22',
   },
 ];
 

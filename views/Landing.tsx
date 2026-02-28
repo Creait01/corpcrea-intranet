@@ -1,6 +1,108 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState } from '../types';
-import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown } from 'lucide-react';
+import { AppState, NewsItem } from '../types';
+import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown, PlayCircle, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+
+// ========================
+// News Detail Modal (Landing)
+// ========================
+const LandingNewsModal: React.FC<{ news: NewsItem; onClose: () => void }> = ({ news, onClose }) => {
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const allImages = news.additionalImages || [];
+  const paragraphs = (news.content || '').split(/\n\n+/).filter(p => p.trim());
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-6 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl my-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Hero */}
+        <div className="relative">
+          {news.type === 'VIDEO' && news.videoUrl ? (
+            <div className="aspect-video bg-black">
+              <video src={news.videoUrl} controls autoPlay className="w-full h-full object-contain" />
+            </div>
+          ) : news.imageUrl ? (
+            <div className="aspect-video overflow-hidden">
+              <img src={news.imageUrl} alt={news.title} className="w-full h-full object-cover" />
+            </div>
+          ) : null}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors backdrop-blur-sm z-10"
+          >
+            <X size={18} />
+          </button>
+          {news.type === 'VIDEO' && (
+            <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 z-10">
+              <PlayCircle size={12}/> VIDEO
+            </div>
+          )}
+        </div>
+
+        <div className="p-6 md:p-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">{news.date}</span>
+            {allImages.length > 0 && (
+              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1">
+                <LayoutGrid size={11}/> {allImages.length} fotos
+              </span>
+            )}
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 leading-tight">{news.title}</h1>
+          <p className="text-slate-600 text-base leading-relaxed mb-6 border-l-4 border-[#CBA052] pl-4 italic bg-amber-50/40 py-3 pr-3 rounded-r-lg">{news.description}</p>
+
+          {paragraphs.length > 0 && (
+            <div className="space-y-4 mb-8">
+              {paragraphs.map((para, i) => (
+                <p key={i} className="text-slate-700 text-[15px] leading-8">{para}</p>
+              ))}
+            </div>
+          )}
+
+          {allImages.length > 0 && (
+            <div className="mt-6 border-t border-slate-100 pt-6">
+              <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <LayoutGrid size={14} className="text-[#CBA052]"/> Galería de imágenes
+              </h3>
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 mb-3 shadow-lg">
+                <img key={carouselIdx} src={allImages[carouselIdx]} alt={`Galería ${carouselIdx + 1}`} className="w-full h-full object-cover" />
+                {allImages.length > 1 && (
+                  <>
+                    <button onClick={() => setCarouselIdx((carouselIdx - 1 + allImages.length) % allImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition-colors">
+                      <ChevronLeft size={20}/>
+                    </button>
+                    <button onClick={() => setCarouselIdx((carouselIdx + 1) % allImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition-colors">
+                      <ChevronRight size={20}/>
+                    </button>
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                      {allImages.map((_, i) => (
+                        <button key={i} onClick={() => setCarouselIdx(i)} className={`rounded-full transition-all duration-300 ${i === carouselIdx ? 'bg-white w-6 h-2' : 'bg-white/50 w-2 h-2'}`}/>
+                      ))}
+                    </div>
+                    <div className="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">{carouselIdx + 1} / {allImages.length}</div>
+                  </>
+                )}
+              </div>
+              {allImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {allImages.map((img, i) => (
+                    <button key={i} onClick={() => setCarouselIdx(i)} className={`flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden transition-all border-2 ${i === carouselIdx ? 'border-[#CBA052] shadow-md scale-105' : 'border-transparent opacity-60 hover:opacity-90'}`}>
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface LandingProps {
   data: AppState;
@@ -42,6 +144,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
 
   // Handle Scroll for Navbar styling
   useEffect(() => {
@@ -142,7 +245,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           >
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
-              style={{ backgroundImage: `url(${item.imageUrl})`, transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
+              style={{ backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : 'none', background: item.imageUrl ? undefined : 'linear-gradient(135deg,#1D3C34,#25282A)', transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#25282A] via-[#25282A]/60 to-[#1D3C34]/40" />
             
@@ -158,8 +261,8 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                   <p className="text-lg md:text-xl text-[#A2B2C8] mb-8 max-w-2xl leading-relaxed">
                     {item.description}
                   </p>
-                  <button className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide">
-                    Leer más <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <button onClick={() => setSelectedNews(item)} className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide">
+                    {item.type === 'VIDEO' ? <><PlayCircle size={20}/> Ver video</> : <>Leer más <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" /></>}
                   </button>
                 </div>
               </div>
@@ -381,6 +484,11 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           </div>
         </div>
       </footer>
+
+      {/* News Detail Modal */}
+      {selectedNews && (
+        <LandingNewsModal news={selectedNews} onClose={() => setSelectedNews(null)} />
+      )}
     </div>
   );
 };

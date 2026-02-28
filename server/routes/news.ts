@@ -30,15 +30,17 @@ router.get('/:id', async (req, res) => {
 // POST /api/news  (admin only)
 router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
   try {
-    const { title, description, imageUrl, videoUrl, type } = req.body;
+    const { title, description, content, imageUrl, videoUrl, additionalImages, type, date } = req.body;
     const item = await prisma.newsItem.create({
       data: {
         title,
         description: description || '',
+        content: content || '',
         imageUrl,
         videoUrl,
+        additionalImages: Array.isArray(additionalImages) ? additionalImages : [],
         type: type || 'IMAGE',
-        date: new Date().toISOString().split('T')[0],
+        date: date || new Date().toISOString().split('T')[0],
       },
     });
     res.status(201).json(item);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, UserRole, ChatMessage, User, ChatChannel, Task, Project, TaskStatus, CalendarEvent, VacationRequest, Loan, SocialBenefitsRequest, OdooDashboardState, OdooLoanItem } from '../types';
+import { AppState, UserRole, ChatMessage, User, ChatChannel, Task, Project, TaskStatus, CalendarEvent, VacationRequest, Loan, SocialBenefitsRequest, OdooDashboardState, OdooLoanItem, NewsItem } from '../types';
 import { MOCK_USERS } from '../data';
 import { 
   FileText, MessageSquare, Users, UserCheck, 
@@ -432,6 +432,155 @@ const GanttChart: React.FC<{
     );
 };
 
+// ========================
+// News Detail Modal
+// ========================
+const NewsDetailModal: React.FC<{ news: NewsItem; onClose: () => void }> = ({ news, onClose }) => {
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const allImages = news.additionalImages || [];
+  const paragraphs = (news.content || '').split(/\n\n+/).filter(p => p.trim());
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-6 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl my-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Hero: Video or Image */}
+        <div className="relative">
+          {news.type === 'VIDEO' && news.videoUrl ? (
+            <div className="aspect-video bg-black">
+              <video src={news.videoUrl} controls autoPlay className="w-full h-full object-contain" />
+            </div>
+          ) : news.imageUrl ? (
+            <div className="aspect-video overflow-hidden">
+              <img src={news.imageUrl} alt={news.title} className="w-full h-full object-cover" />
+            </div>
+          ) : null}
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors backdrop-blur-sm z-10"
+          >
+            <X size={18} />
+          </button>
+
+          {/* Video badge */}
+          {news.type === 'VIDEO' && (
+            <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 z-10">
+              <PlayCircle size={12}/> VIDEO
+            </div>
+          )}
+        </div>
+
+        {/* Article Content */}
+        <div className="p-6 md:p-8">
+          {/* Meta */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+              {news.date}
+            </span>
+            {(allImages.length > 0) && (
+              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1">
+                <LayoutGrid size={11}/> {allImages.length} fotos
+              </span>
+            )}
+          </div>
+
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 leading-tight">{news.title}</h1>
+
+          <p className="text-slate-600 text-base leading-relaxed mb-6 border-l-4 border-blue-500 pl-4 italic bg-blue-50/40 py-3 pr-3 rounded-r-lg">
+            {news.description}
+          </p>
+
+          {/* Article Body Paragraphs */}
+          {paragraphs.length > 0 && (
+            <div className="space-y-4 mb-8">
+              {paragraphs.map((para, i) => (
+                <p key={i} className="text-slate-700 text-[15px] leading-8">{para}</p>
+              ))}
+            </div>
+          )}
+
+          {/* Image Carousel */}
+          {allImages.length > 0 && (
+            <div className="mt-6 border-t border-slate-100 pt-6">
+              <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <LayoutGrid size={14} className="text-blue-500"/> Galería de imágenes
+              </h3>
+
+              {/* Main image */}
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 mb-3 shadow-lg">
+                <img
+                  key={carouselIdx}
+                  src={allImages[carouselIdx]}
+                  alt={`Galería ${carouselIdx + 1}`}
+                  className="w-full h-full object-cover transition-opacity duration-300"
+                />
+
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCarouselIdx((carouselIdx - 1 + allImages.length) % allImages.length)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition-colors shadow-lg"
+                    >
+                      <ChevronLeft size={20}/>
+                    </button>
+                    <button
+                      onClick={() => setCarouselIdx((carouselIdx + 1) % allImages.length)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition-colors shadow-lg"
+                    >
+                      <ChevronRight size={20}/>
+                    </button>
+
+                    {/* Dots */}
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                      {allImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCarouselIdx(i)}
+                          className={`rounded-full transition-all duration-300 ${i === carouselIdx ? 'bg-white w-6 h-2' : 'bg-white/50 w-2 h-2 hover:bg-white/70'}`}
+                        />
+                      ))}
+                    </div>
+                    {/* Counter */}
+                    <div className="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+                      {carouselIdx + 1} / {allImages.length}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnails strip */}
+              {allImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {allImages.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCarouselIdx(i)}
+                      className={`flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden transition-all duration-200 border-2 ${
+                        i === carouselIdx
+                          ? 'border-blue-500 shadow-md scale-105'
+                          : 'border-transparent opacity-60 hover:opacity-90 hover:scale-102'
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const Dashboard: React.FC<DashboardProps> = ({ 
   data, onLogout, onNavigateAdmin, onSendMessage, onCreateGroup, onCreateDM, onAddTask, onUpdateTask,
   onAddCalendarEvent, onRequestVacation, onApproveVacation, onRequestLoan, onMarkTrainingComplete,
@@ -439,6 +588,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'home' | 'docs' | 'hr' | 'calendar' | 'learning'>('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   
   // Chat State
   const [activeChannelId, setActiveChannelId] = useState<string>('general');
@@ -762,14 +912,49 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {/* Internal News */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bell className="text-blue-500" size={20}/> Noticias Internas</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {data.news.map(n => (
-                  <div key={n.id} className="group cursor-pointer">
-                    <div className="h-40 rounded-xl overflow-hidden mb-3">
-                      <img src={n.imageUrl} alt={n.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <div
+                    key={n.id}
+                    className="group cursor-pointer rounded-2xl overflow-hidden border border-slate-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 bg-white"
+                    onClick={() => setSelectedNews(n)}
+                  >
+                    {/* Thumbnail */}
+                    <div className="h-44 overflow-hidden relative bg-slate-100">
+                      {n.type === 'VIDEO' && n.videoUrl ? (
+                        <>
+                          {n.imageUrl
+                            ? <img src={n.imageUrl} alt={n.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            : <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center"><PlayCircle size={40} className="text-white/50"/></div>
+                          }
+                          {/* Play overlay */}
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 flex items-center justify-center transition-all duration-300">
+                            <div className="bg-white/90 rounded-full p-3 shadow-xl scale-90 group-hover:scale-100 transition-transform duration-300">
+                              <PlayCircle size={26} className="text-slate-800" />
+                            </div>
+                          </div>
+                          <span className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
+                            <PlayCircle size={9}/> VIDEO
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <img src={n.imageUrl} alt={n.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
+                        </>
+                      )}
+                      {(n.additionalImages || []).length > 0 && (
+                        <span className="absolute top-3 right-3 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+                          +{(n.additionalImages || []).length} fotos
+                        </span>
+                      )}
                     </div>
-                    <h4 className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">{n.title}</h4>
-                    <span className="text-xs text-slate-500">{n.date}</span>
+                    {/* Card body */}
+                    <div className="p-4">
+                      <h4 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight line-clamp-2 mb-1">{n.title}</h4>
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-2">{n.description}</p>
+                      <span className="text-[11px] text-slate-400 font-medium">{n.date}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1601,6 +1786,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* News Detail Modal */}
+        {selectedNews && (
+          <NewsDetailModal news={selectedNews} onClose={() => setSelectedNews(null)} />
         )}
 
       </main>

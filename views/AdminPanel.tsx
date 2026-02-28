@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department } from '../types';
-import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff, PlayCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { odooApi } from '../services/odooApi';
 import { CloudinaryUpload } from '../components/CloudinaryUpload';
 import { cloudinaryService } from '../services/cloudinaryUpload';
@@ -18,7 +18,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   const user = data.currentUser;
   
   // Local state for forms
-  const [newNews, setNewNews] = useState<Partial<NewsItem>>({ title: '', description: '', imageUrl: '', date: '' });
+  const [newNews, setNewNews] = useState<Partial<NewsItem>>({ title: '', description: '', content: '', imageUrl: '', videoUrl: '', additionalImages: [], date: '', type: 'IMAGE' });
   const [newEvent, setNewEvent] = useState<Partial<EventItem>>({ title: '', description: '', location: '', date: '' });
   
   // Document Form State
@@ -144,17 +144,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   };
 
   const handleAddNews = () => {
-    if (newNews.title && newNews.description && newNews.imageUrl) {
+    const isVideo = newNews.type === 'VIDEO';
+    const hasMedia = isVideo ? Boolean(newNews.videoUrl) : Boolean(newNews.imageUrl);
+    if (newNews.title && newNews.description && hasMedia) {
       actions.addNews({
         id: Date.now().toString(),
-        imageUrl: newNews.imageUrl!,
         title: newNews.title!,
         description: newNews.description!,
-        date: newNews.date || new Date().toISOString().split('T')[0]
+        content: newNews.content || '',
+        imageUrl: newNews.imageUrl || '',
+        videoUrl: newNews.videoUrl || '',
+        additionalImages: (newNews.additionalImages || []).filter(Boolean),
+        type: newNews.type || 'IMAGE',
+        date: newNews.date || new Date().toISOString().split('T')[0],
       });
-      setNewNews({ title: '', description: '', imageUrl: '', date: '' });
+      setNewNews({ title: '', description: '', content: '', imageUrl: '', videoUrl: '', additionalImages: [], date: '', type: 'IMAGE' });
     } else {
-        alert("Por favor completa el título, la descripción y sube una imagen.");
+      alert('Por favor completa el título, la descripción y al menos una imagen o video.');
     }
   };
 
@@ -276,88 +282,212 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
           
           {activeSection === 'news' && (
             <>
+              {/* ── FORM: Publish New Article ── */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
+                <h2 className="text-xl font-bold mb-5 flex items-center gap-2 text-slate-800">
                   <Plus className="text-blue-600" /> Publicar Nueva Noticia
                 </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Left Column: Form Fields */}
+
+                {/* Type Toggle */}
+                <div className="flex gap-2 mb-6">
+                  <button
+                    onClick={() => setNewNews({...newNews, type: 'IMAGE'})}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+                      newNews.type !== 'VIDEO'
+                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <ImageIcon size={15}/> Noticia con Imagen
+                  </button>
+                  <button
+                    onClick={() => setNewNews({...newNews, type: 'VIDEO'})}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
+                      newNews.type === 'VIDEO'
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Video size={15}/> Noticia con Video
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left: Article fields */}
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Título de la noticia</label>
-                      <input 
-                        placeholder="Ej: Lanzamiento de producto..." 
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Título *</label>
+                      <input
+                        placeholder="Ej: Lanzamiento de producto..."
                         className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
-                        value={newNews.title} 
+                        value={newNews.title || ''}
                         onChange={e => setNewNews({...newNews, title: e.target.value})}
                       />
                     </div>
-                    
+
                     <div>
-                       <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de publicación</label>
-                       <input 
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de publicación</label>
+                      <input
                         type="date"
                         className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
-                        value={newNews.date} 
+                        value={newNews.date || ''}
                         onChange={e => setNewNews({...newNews, date: e.target.value})}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Descripción</label>
-                      <textarea 
-                        placeholder="Resumen de la noticia..." 
-                        className="p-3 border border-slate-300 rounded-lg w-full h-32 resize-none focus:ring-2 focus:ring-blue-500 outline-none"
-                        value={newNews.description} 
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Extracto / Resumen *</label>
+                      <textarea
+                        placeholder="Descripción breve que aparece en la vista previa..."
+                        className="p-3 border border-slate-300 rounded-lg w-full h-20 resize-none focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={newNews.description || ''}
                         onChange={e => setNewNews({...newNews, description: e.target.value})}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Cuerpo del artículo
+                        <span className="text-[11px] text-slate-400 ml-2">(separa párrafos con una línea en blanco)</span>
+                      </label>
+                      <textarea
+                        placeholder={`Escribe aquí el contenido completo de la noticia...\n\nCada párrafo separado por una línea en blanco.`}
+                        className="p-3 border border-slate-300 rounded-lg w-full h-52 resize-none focus:ring-2 focus:ring-blue-500 outline-none text-sm leading-relaxed"
+                        value={newNews.content || ''}
+                        onChange={e => setNewNews({...newNews, content: e.target.value})}
                       />
                     </div>
                   </div>
 
-                  {/* Right Column: Image Uploader */}
-                  <div className="flex flex-col">
-                    <CloudinaryUpload 
-                        label="Imagen de portada"
+                  {/* Right: Media */}
+                  <div className="space-y-4">
+                    {newNews.type === 'VIDEO' ? (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">URL del Video *</label>
+                          <input
+                            type="url"
+                            placeholder="https://res.cloudinary.com/.../video.mp4"
+                            className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-red-500 outline-none text-sm"
+                            value={newNews.videoUrl || ''}
+                            onChange={e => setNewNews({...newNews, videoUrl: e.target.value})}
+                          />
+                          <p className="text-[11px] text-slate-400 mt-1">Sube el video a Cloudinary y pega el URL directo (.mp4 recomendado)</p>
+                        </div>
+                        {newNews.videoUrl && (
+                          <div className="rounded-xl overflow-hidden bg-black aspect-video border border-slate-200">
+                            <video src={newNews.videoUrl} controls className="w-full h-full" />
+                          </div>
+                        )}
+                        <CloudinaryUpload
+                          label="Imagen de portada del video (thumbnail)"
+                          accept="image/*"
+                          folder="corpocrea/news"
+                          currentUrl={newNews.imageUrl || ''}
+                          onUpload={(result) => setNewNews({...newNews, imageUrl: result.url})}
+                        />
+                      </div>
+                    ) : (
+                      <CloudinaryUpload
+                        label="Imagen de portada *"
                         accept="image/*"
                         folder="corpocrea/news"
                         currentUrl={newNews.imageUrl || ''}
                         onUpload={(result) => setNewNews({...newNews, imageUrl: result.url})}
-                    />
-                    <div className="mt-auto pt-4">
-                        <button 
-                            onClick={handleAddNews} 
-                            disabled={!newNews.title || !newNews.imageUrl}
-                            className="w-full bg-blue-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg shadow-blue-600/20"
-                        >
-                        <Save size={20} /> Publicar
-                        </button>
+                      />
+                    )}
+
+                    {/* Additional Images */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Fotos adicionales
+                        <span className="text-[11px] text-slate-400 ml-2">(galería / carrusel dentro del artículo)</span>
+                      </label>
+                      <div className="space-y-2">
+                        {[0, 1, 2, 3, 4].map((idx) => {
+                          const imgs = newNews.additionalImages || [];
+                          return (
+                            <div key={idx} className="flex items-center gap-2">
+                              <div className="flex-1">
+                                <CloudinaryUpload
+                                  label={`Foto ${idx + 1}`}
+                                  accept="image/*"
+                                  folder="corpocrea/news/gallery"
+                                  currentUrl={imgs[idx] || ''}
+                                  onUpload={(result) => {
+                                    const updated = [...(newNews.additionalImages || []).slice(0, 5)];
+                                    updated[idx] = result.url;
+                                    setNewNews({...newNews, additionalImages: updated.filter(Boolean)});
+                                  }}
+                                />
+                              </div>
+                              {imgs[idx] && (
+                                <button
+                                  onClick={() => {
+                                    const updated = [...(newNews.additionalImages || [])];
+                                    updated.splice(idx, 1);
+                                    setNewNews({...newNews, additionalImages: updated.filter(Boolean)});
+                                  }}
+                                  className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                                >
+                                  <X size={15}/>
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
+
+                    <button
+                      onClick={handleAddNews}
+                      disabled={!newNews.title || !newNews.description || (newNews.type === 'VIDEO' ? !newNews.videoUrl : !newNews.imageUrl)}
+                      className="w-full bg-blue-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg shadow-blue-600/20"
+                    >
+                      <Save size={20} /> Publicar Noticia
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* List of News */}
+              {/* ── LIST: Published Articles ── */}
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                   <h3 className="font-bold text-slate-700">Noticias Activas</h3>
-                   <span className="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{data.news.length} items</span>
+                  <h3 className="font-bold text-slate-700">Noticias Publicadas</h3>
+                  <span className="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{data.news.length} items</span>
                 </div>
                 <div className="divide-y divide-slate-100">
-                    {data.news.map(item => (
+                  {data.news.map(item => (
                     <div key={item.id} className="p-4 flex gap-4 items-center hover:bg-slate-50 transition-colors group">
-                        <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200">
-                           <img src={item.imageUrl} className="w-full h-full object-cover" alt="news" />
-                        </div>
-                        <div className="flex-1 min-w-0">
+                      <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 bg-slate-100 relative">
+                        {item.type === 'VIDEO' ? (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                            {item.imageUrl
+                              ? <img src={item.imageUrl} className="w-full h-full object-cover opacity-60" alt="thumb" />
+                              : <PlayCircle size={22} className="text-white" />}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <PlayCircle size={20} className="text-white drop-shadow-lg" />
+                            </div>
+                          </div>
+                        ) : (
+                          <img src={item.imageUrl} className="w-full h-full object-cover" alt="news" />
+                        )}
+                        {item.type === 'VIDEO' && (
+                          <span className="absolute bottom-1 left-1 bg-red-500 text-white text-[8px] font-bold px-1 rounded leading-tight">VIDEO</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-slate-800 truncate">{item.title}</h4>
                         <p className="text-sm text-slate-500 truncate">{item.date} — {item.description}</p>
-                        </div>
-                        <button onClick={() => actions.deleteNews(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                            <Trash2 size={18} />
-                        </button>
+                        {(item.additionalImages || []).length > 0 && (
+                          <span className="text-[11px] text-blue-500 font-medium">+{(item.additionalImages || []).length} foto(s) en galería</span>
+                        )}
+                      </div>
+                      <button onClick={() => actions.deleteNews(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={18} />
+                      </button>
                     </div>
-                    ))}
+                  ))}
                 </div>
               </div>
             </>

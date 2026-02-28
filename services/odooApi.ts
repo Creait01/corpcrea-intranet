@@ -172,15 +172,20 @@ class OdooApiService {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      // Route through backend proxy to avoid CORS issues (server-to-server call)
+      const response = await fetch('/api/odoo/proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': this.apiKey,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          odooUrl: this.baseUrl,
+          apiKey: this.apiKey,
+          endpoint,
+          data,
+        }),
         signal: controller.signal,
       });
 
@@ -255,24 +260,24 @@ class OdooApiService {
     }
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      const response = await fetch(`${this.baseUrl}/web/webclient/version_info`, {
+      // Route through backend proxy to avoid CORS issues
+      const response = await fetch('/api/odoo/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {} }),
+        body: JSON.stringify({ odooUrl: this.baseUrl }),
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const data = await response.json();
-        const version = data?.result?.server_version || 'desconocida';
-        return { success: true, message: `Conectado a Odoo v${version}` };
-      }
-      return { success: false, message: `Error HTTP: ${response.status}` };
+      const data = await response.json();
+      return data;
     } catch (error: any) {
+      if (error.name === 'AbortError') {
+        return { success: false, message: 'Tiempo de espera agotado.' };
+      }
       return { success: false, message: `Error: ${error.message}` };
     }
   }

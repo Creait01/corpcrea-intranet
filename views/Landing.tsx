@@ -243,18 +243,39 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
             key={item.id}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentNewsIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
           >
-            <div 
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
-              style={{ backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : 'none', background: item.imageUrl ? undefined : 'linear-gradient(135deg,#1D3C34,#25282A)', transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
-            />
+            {/* Background: video loop or static image */}
+            {item.type === 'VIDEO' && item.videoUrl ? (
+              <video
+                src={item.videoUrl}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms]"
+                style={{ transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
+              />
+            ) : (
+              <div 
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
+                style={{ backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : 'none', background: item.imageUrl ? undefined : 'linear-gradient(135deg,#1D3C34,#25282A)', transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#25282A] via-[#25282A]/60 to-[#1D3C34]/40" />
             
             <div className="absolute inset-0 flex items-end">
               <div className="max-w-7xl mx-auto px-4 pb-32 md:pb-40 w-full">
                 <div className="max-w-3xl">
-                  <span className="inline-block px-4 py-1.5 bg-[#CBA052] text-white text-xs font-black rounded-full mb-5 tracking-wider uppercase shadow-lg shadow-[#CBA052]/30">
-                    Novedades
-                  </span>
+                  <div className="flex items-center gap-3 mb-5">
+                    <span className="inline-block px-4 py-1.5 bg-[#CBA052] text-white text-xs font-black rounded-full tracking-wider uppercase shadow-lg shadow-[#CBA052]/30">
+                      Novedades
+                    </span>
+                    {item.type === 'VIDEO' && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600/90 text-white text-xs font-black rounded-full tracking-wider uppercase backdrop-blur-sm shadow-lg">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"/>
+                        VIDEO EN VIVO
+                      </span>
+                    )}
+                  </div>
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-5 leading-[1.1] tracking-tight">
                     {item.title}
                   </h1>

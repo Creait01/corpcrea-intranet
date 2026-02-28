@@ -5,6 +5,18 @@ import { generateToken, authMiddleware, AuthRequest } from '../middleware/auth.j
 
 const router = Router();
 
+// GET /api/auth/check-cedula/:cedula
+router.get('/check-cedula/:cedula', async (req, res) => {
+  try {
+    const { cedula } = req.params;
+    const user = await prisma.user.findFirst({ where: { identificationId: cedula } });
+    res.json({ exists: !!user });
+  } catch (err) {
+    console.error('Check cedula error:', err);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
@@ -48,6 +60,15 @@ router.post('/register', async (req, res) => {
     if (existing) {
       res.status(409).json({ error: 'El email ya está registrado' });
       return;
+    }
+
+    // Also block if this cedula already has an account
+    if (identificationId) {
+      const existingByCedula = await prisma.user.findFirst({ where: { identificationId } });
+      if (existingByCedula) {
+        res.status(409).json({ error: 'Ya existe una cuenta registrada con esta cédula' });
+        return;
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

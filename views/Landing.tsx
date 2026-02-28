@@ -157,7 +157,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentNewsIndex((prev) => (prev + 1) % data.news.length);
-    }, 5000);
+    }, 10000);
     return () => clearInterval(timer);
   }, [data.news.length]);
 
@@ -270,9 +270,8 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                       Novedades
                     </span>
                     {item.type === 'VIDEO' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600/90 text-white text-xs font-black rounded-full tracking-wider uppercase backdrop-blur-sm shadow-lg">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"/>
-                        VIDEO EN VIVO
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/50 text-white text-xs font-bold rounded-full tracking-wider uppercase backdrop-blur-sm border border-white/20">
+                        <PlayCircle size={11}/> Video
                       </span>
                     )}
                   </div>

@@ -362,25 +362,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                   {/* Right: Media */}
                   <div className="space-y-4">
                     {newNews.type === 'VIDEO' ? (
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">URL del Video *</label>
-                          <input
-                            type="url"
-                            placeholder="https://res.cloudinary.com/.../video.mp4"
-                            className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-red-500 outline-none text-sm"
-                            value={newNews.videoUrl || ''}
-                            onChange={e => setNewNews({...newNews, videoUrl: e.target.value})}
-                          />
-                          <p className="text-[11px] text-slate-400 mt-1">Sube el video a Cloudinary y pega el URL directo (.mp4 recomendado)</p>
-                        </div>
+                      <div className="space-y-4">
+                        <CloudinaryUpload
+                          label="Subir Video *"
+                          accept="video/*"
+                          folder="corpocrea/news/videos"
+                          currentUrl={newNews.videoUrl || ''}
+                          onUpload={(result) => setNewNews({...newNews, videoUrl: result.url})}
+                        />
                         {newNews.videoUrl && (
                           <div className="rounded-xl overflow-hidden bg-black aspect-video border border-slate-200">
                             <video src={newNews.videoUrl} controls className="w-full h-full" />
                           </div>
                         )}
                         <CloudinaryUpload
-                          label="Imagen de portada del video (thumbnail)"
+                          label="Imagen de portada (thumbnail)"
                           accept="image/*"
                           folder="corpocrea/news"
                           currentUrl={newNews.imageUrl || ''}

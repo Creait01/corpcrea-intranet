@@ -2,6 +2,7 @@
  * Corpocrea Odoo API Service
  * 
  * Servicio para conectar la intranet con los endpoints REST de Odoo.
+ * Todas las llamadas pasan por el proxy del servidor Express para evitar CORS.
  * Configuración almacenada en localStorage para persistencia.
  */
 
@@ -129,7 +130,7 @@ export interface ApiResponse<T> {
 }
 
 // =============================================
-// Servicio API
+// Servicio API (a través de proxy server-side)
 // =============================================
 
 class OdooApiService {
@@ -145,7 +146,7 @@ class OdooApiService {
    * Configura la URL base y API key de Odoo
    */
   setConfig(url: string, apiKey: string) {
-    this.baseUrl = url.replace(/\/+$/, ''); // Remove trailing slash
+    this.baseUrl = url.replace(/\/+$/, '');
     this.apiKey = apiKey;
     localStorage.setItem('odoo_url', this.baseUrl);
     localStorage.setItem('odoo_api_key', this.apiKey);
@@ -163,7 +164,8 @@ class OdooApiService {
   }
 
   /**
-   * Realiza una petición POST a la API
+   * Realiza una petición a Odoo a través del proxy del servidor Express.
+   * Esto evita problemas de CORS.
    */
   private async post<T>(endpoint: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
     if (!this.baseUrl) {
@@ -172,14 +174,11 @@ class OdooApiService {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
 
-      // Route through backend proxy to avoid CORS issues (server-to-server call)
       const response = await fetch('/api/odoo/proxy', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           odooUrl: this.baseUrl,
           apiKey: this.apiKey,
@@ -206,45 +205,30 @@ class OdooApiService {
 
   // ---- Endpoints ----
 
-  /**
-   * Verifica si una persona es empleado por su cédula
-   */
   async verifyEmployee(identificationId: string): Promise<ApiResponse<undefined> & { employee?: OdooEmployeeInfo }> {
     return this.post('/api/corpocrea/verify_employee', {
       identification_id: identificationId,
     });
   }
 
-  /**
-   * Obtiene las prestaciones sociales del empleado
-   */
   async getSocialBenefits(identificationId: string): Promise<ApiResponse<OdooSocialBenefits>> {
     return this.post('/api/corpocrea/social_benefits', {
       identification_id: identificationId,
     });
   }
 
-  /**
-   * Obtiene los días de vacaciones del empleado
-   */
   async getVacationDays(identificationId: string): Promise<ApiResponse<OdooVacationDays>> {
     return this.post('/api/corpocrea/vacation_days', {
       identification_id: identificationId,
     });
   }
 
-  /**
-   * Obtiene los préstamos activos del empleado
-   */
   async getActiveLoans(identificationId: string): Promise<ApiResponse<OdooLoansData>> {
     return this.post('/api/corpocrea/active_loans', {
       identification_id: identificationId,
     });
   }
 
-  /**
-   * Obtiene toda la información del empleado en una sola llamada
-   */
   async getEmployeeDashboard(identificationId: string): Promise<ApiResponse<OdooDashboardData>> {
     return this.post('/api/corpocrea/employee_dashboard', {
       identification_id: identificationId,
@@ -252,7 +236,7 @@ class OdooApiService {
   }
 
   /**
-   * Verifica la conectividad con el servidor Odoo
+   * Verifica la conectividad con el servidor Odoo (a través del proxy)
    */
   async testConnection(): Promise<{ success: boolean; message: string }> {
     if (!this.baseUrl) {
@@ -260,9 +244,8 @@ class OdooApiService {
     }
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      // Route through backend proxy to avoid CORS issues
       const response = await fetch('/api/odoo/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -271,17 +254,11 @@ class OdooApiService {
       });
 
       clearTimeout(timeoutId);
-
-      const data = await response.json();
-      return data;
+      return await response.json();
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        return { success: false, message: 'Tiempo de espera agotado.' };
-      }
       return { success: false, message: `Error: ${error.message}` };
     }
   }
 }
 
-// Singleton instance
 export const odooApi = new OdooApiService();

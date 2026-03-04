@@ -58,16 +58,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
     setRegError('');
 
     try {
-      // First: check if an account already exists for this cedula in our system
-      const checkRes = await fetch(`/api/auth/check-cedula/${encodeURIComponent(cedula.trim())}`);
-      const checkData = await checkRes.json();
-      if (checkData.exists) {
-        setRegError('Ya existe una cuenta registrada con esta cédula. Inicia sesión en lugar de registrarte.');
-        setRegLoading(false);
-        return;
-      }
-
-      // Second: verify the employee exists in Odoo
       const result = await odooApi.verifyEmployee(cedula.trim());
       
       if (result.success && result.employee) {

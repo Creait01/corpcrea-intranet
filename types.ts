@@ -130,10 +130,8 @@ export interface NewsItem {
   id: string;
   title: string;
   description: string;
-  content?: string;           // Full article body (paragraphs separated by \n\n)
   imageUrl?: string;
   videoUrl?: string;
-  additionalImages?: string[]; // Extra photos for in-article carousel
   type?: 'IMAGE' | 'VIDEO';
   date: string;
 }

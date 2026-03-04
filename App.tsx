@@ -390,9 +390,8 @@ const App: React.FC = () => {
         );
 
       case 'ADMIN':
-        // Allow Manager OR CEO
-        if (!data.currentUser || (data.currentUser.role !== UserRole.MANAGER && data.currentUser.role !== UserRole.CEO)) {
-            setCurrentView('DASHBOARD'); // Protection
+        if (!data.currentUser || data.currentUser.role !== UserRole.MANAGER) {
+            setCurrentView('DASHBOARD');
             return null;
         }
         return (

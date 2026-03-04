@@ -17,15 +17,15 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'mgr-1',
-    name: 'Carlos Admin',
-    email: 'admin@corpocrea.com',
-    password: '123',
-    role: UserRole.MANAGER, // Acting as HR for now
-    avatar: 'https://ui-avatars.com/api/?name=Carlos+Admin&background=0D8ABC&color=fff',
-    position: 'Director de Comunicación',
-    department: 'Recursos Humanos',
-    vacationDays: 12,
-    socialBenefits: 320400.50, // VES
+    name: 'Soporte Técnico',
+    email: 'it@corpocrea.com',
+    password: 'galipan2023',
+    role: UserRole.MANAGER,
+    avatar: 'https://ui-avatars.com/api/?name=Soporte+Tecnico&background=0D8ABC&color=fff',
+    position: 'Soporte Técnico',
+    department: 'IT',
+    vacationDays: 0,
+    socialBenefits: 0,
     loans: []
   },
   {
@@ -68,247 +68,56 @@ export const MOCK_USERS: User[] = [
   }
 ];
 
-export const INITIAL_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', userId: 'emp-1', title: 'Préstamo Aprobado', message: 'Tu solicitud de préstamo por $500 ha sido aprobada.', date: '2024-01-16', read: false, type: 'SUCCESS' },
-  { id: 'n2', userId: 'emp-1', title: 'Recordatorio', message: 'Recuerda completar tu evaluación de desempeño.', date: '2024-05-20', read: true, type: 'INFO' }
-];
+export const INITIAL_NOTIFICATIONS: Notification[] = [];
 
 export const INITIAL_DOCUMENT_REQUESTS: DocumentRequest[] = [];
 
-// ... (rest of the file)
-
-export const INITIAL_DEPARTMENTS: Department[] = [
-  { id: 'd1', name: 'Dirección', description: 'Alta gerencia y estrategia corporativa', managerId: 'ceo-1' },
-  { id: 'd2', name: 'Recursos Humanos', description: 'Gestión de talento y cultura', managerId: 'mgr-1' },
-  { id: 'd3', name: 'Proyectos', description: 'Ejecución y supervisión de obras', managerId: 'emp-1' },
-  { id: 'd4', name: 'Ingeniería', description: 'Diseño técnico y cálculos', managerId: 'emp-2' },
-  { id: 'd5', name: 'IT', description: 'Tecnología e infraestructura digital' },
-  { id: 'd6', name: 'Producto', description: 'Diseño de experiencia y producto digital' },
-  { id: 'd7', name: 'Operaciones', description: 'Logística y procesos operativos' },
-];
+export const INITIAL_DEPARTMENTS: Department[] = [];
 
 export const INITIAL_CALENDAR_EVENTS: CalendarEvent[] = [
-  // Venezuelan Holidays 2024 (Partial List)
-  { id: 'h1', title: 'Año Nuevo', date: '2024-01-01', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h2', title: 'Carnaval', date: '2024-02-12', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h3', title: 'Carnaval', date: '2024-02-13', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h4', title: 'Semana Santa (Jueves)', date: '2024-03-28', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h5', title: 'Semana Santa (Viernes)', date: '2024-03-29', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h6', title: 'Declaración de Independencia', date: '2024-04-19', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h7', title: 'Día del Trabajador', date: '2024-05-01', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h8', title: 'Batalla de Carabobo', date: '2024-06-24', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h9', title: 'Día de la Independencia', date: '2024-07-05', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h10', title: 'Natalicio de Simón Bolívar', date: '2024-07-24', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h11', title: 'Día de la Resistencia Indígena', date: '2024-10-12', type: 'HOLIDAY', isWorkingDay: false },
-  { id: 'h12', title: 'Navidad', date: '2024-12-25', type: 'HOLIDAY', isWorkingDay: false },
-  // Company Events
-  { id: 'e1', title: 'Reunión Trimestral', date: '2024-06-15', type: 'EVENT', isWorkingDay: true, description: 'Revisión de objetivos Q2' },
+  // Feriados Venezuela 2026
+  { id: 'h1', title: 'Año Nuevo', date: '2026-01-01', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h2', title: 'Carnaval', date: '2026-02-16', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h3', title: 'Carnaval', date: '2026-02-17', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h4', title: 'Semana Santa (Jueves)', date: '2026-04-02', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h5', title: 'Semana Santa (Viernes)', date: '2026-04-03', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h6', title: 'Declaración de Independencia', date: '2026-04-19', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h7', title: 'Día del Trabajador', date: '2026-05-01', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h8', title: 'Batalla de Carabobo', date: '2026-06-24', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h9', title: 'Día de la Independencia', date: '2026-07-05', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h10', title: 'Natalicio de Simón Bolívar', date: '2026-07-24', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h11', title: 'Día de la Resistencia Indígena', date: '2026-10-12', type: 'HOLIDAY', isWorkingDay: false },
+  { id: 'h12', title: 'Navidad', date: '2026-12-25', type: 'HOLIDAY', isWorkingDay: false },
 ];
 
-export const INITIAL_VACATION_REQUESTS: VacationRequest[] = [
-  { id: 'v1', userId: 'emp-1', startDate: '2024-08-01', endDate: '2024-08-15', days: 10, status: 'PENDING', requestDate: '2024-05-20' }
-];
+export const INITIAL_VACATION_REQUESTS: VacationRequest[] = [];
 
 export const INITIAL_CEO_MESSAGE: CeoMessageContent = {
-  text: "Este trimestre hemos superado todas las expectativas gracias al esfuerzo de cada uno de vosotros. Sigamos construyendo el futuro juntos.",
-  imageUrl: "https://picsum.photos/400/300?grayscale",
+  text: '',
+  imageUrl: '',
   updatedAt: new Date().toLocaleDateString()
 };
 
-export const INITIAL_NEWS: NewsItem[] = [
-  {
-    id: '1',
-    title: 'Expansión Global 2025',
-    description: 'Corpocrea abre nuevas oficinas en Madrid y Buenos Aires, consolidando su presencia latinoamericana.',
-    content: 'Estamos orgullosos de anunciar la apertura de nuestras nuevas sedes en Madrid, España y Buenos Aires, Argentina. Este hito representa el resultado de años de trabajo sostenido y la confianza depositada por nuestros clientes a nivel internacional.\n\nLas nuevas oficinas contarán con equipos especializados en diseño arquitectónico, ingeniería y proyectos BIM, brindando soporte local a los clientes de cada región. Se espera que para el cierre del año fiscal se incorporen más de 40 profesionales a ambas sedes.\n\nEl Director General destacó que esta expansión es parte del plan estratégico 2025-2030 que posiciona a Corpocrea como referente en la región hispanohablante. "Llevamos nuestra filosofía de excelencia e innovación a nuevos mercados", afirmó.',
-    imageUrl: 'https://picsum.photos/1200/600?random=1',
-    additionalImages: [
-      'https://picsum.photos/1200/600?random=21',
-      'https://picsum.photos/1200/600?random=22',
-      'https://picsum.photos/1200/600?random=23',
-    ],
-    type: 'IMAGE',
-    date: '2025-05-15',
-  },
-  {
-    id: '2',
-    title: 'Innovación con Inteligencia Artificial',
-    description: 'Implementamos herramientas de IA en nuestros procesos internos de diseño y gestión de proyectos.',
-    content: 'Corpocrea ha iniciado la integración de herramientas de Inteligencia Artificial en sus flujos de trabajo internos. El programa piloto, que inició en el trimestre pasado, ha arrojado resultados prometedores en términos de eficiencia y calidad de entregables.\n\nEntre las herramientas adoptadas destacan asistentes de generación de planos, revisión automatizada de documentos BIM y chatbots de soporte interno para gestión de proyectos. El equipo de IT reporta una reducción del 30% en tiempos de revisión documental.\n\nLa empresa planea extender estas capacidades a todos sus departamentos durante el siguiente semestre, con especial énfasis en las áreas de Presupuesto, Calidad y Recursos Humanos.',
-    videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    imageUrl: 'https://picsum.photos/1200/600?random=5',
-    additionalImages: [
-      'https://picsum.photos/1200/600?random=31',
-      'https://picsum.photos/1200/600?random=32',
-    ],
-    type: 'VIDEO',
-    date: '2025-04-10',
-  },
-  {
-    id: '3',
-    title: 'Premio Nacional a la Excelencia en Construcción',
-    description: 'Corpocrea recibe el galardón por el proyecto Torre Diamante en la categoría de Diseño Sostenible.',
-    content: 'En una ceremonia celebrada en el Centro de Convenciones Nacional, Corpocrea recibió el Premio Nacional a la Excelencia en Construcción en la categoría de Diseño Sostenible por el proyecto Torre Diamante, un edificio de uso mixto de 32 pisos ubicado en el centro financiero de la ciudad.\n\nEl jurado destacó el uso innovador de materiales reciclados, la integración de paneles solares de última generación y el sistema de recolección de agua pluvial que reduce en un 45% el consumo hídrico del edificio. El proyecto fue liderado por nuestro Departamento de Arquitectura e Ingeniería Sostenible.\n\nEste reconocimiento se suma a los tres premios internacionales obtenidos en los últimos dos años, reafirmando el compromiso de Corpocrea con la construcción responsable y el futuro del planeta.',
-    imageUrl: 'https://picsum.photos/1200/600?random=8',
-    additionalImages: [
-      'https://picsum.photos/1200/600?random=41',
-      'https://picsum.photos/1200/600?random=42',
-      'https://picsum.photos/1200/600?random=43',
-      'https://picsum.photos/1200/600?random=44',
-    ],
-    type: 'IMAGE',
-    date: '2025-03-22',
-  },
-];
+export const INITIAL_NEWS: NewsItem[] = [];
 
 export const INITIAL_SOCIAL_BENEFITS_REQUESTS: SocialBenefitsRequest[] = [];
 
-export const INITIAL_EVENTS: EventItem[] = [
-  {
-    id: '1',
-    title: 'Townhall Trimestral',
-    date: '2024-06-15',
-    location: 'Auditorio Principal',
-    description: 'Revisión de resultados y objetivos Q3.',
-  },
-  {
-    id: '2',
-    title: 'Taller de Liderazgo',
-    date: '2024-06-20',
-    location: 'Sala Zoom B',
-    description: 'Capacitación para managers y líderes de equipo.',
-  },
-];
+export const INITIAL_EVENTS: EventItem[] = [];
 
-export const INITIAL_EMPLOYEES: Employee[] = [
-  {
-    id: '1',
-    name: 'Ana García',
-    position: 'UX Designer',
-    department: 'Producto',
-    photo: 'https://picsum.photos/200/200?random=10',
-    skills: ['Figma', 'React', 'Agile'],
-    isMonthEmployee: true,
-    birthDate: '05-20',
-    startDate: '2020-05-15',
-  },
-  {
-    id: '2',
-    name: 'Carlos Rodríguez',
-    position: 'Project Manager',
-    department: 'Operaciones',
-    photo: 'https://picsum.photos/200/200?random=11',
-    skills: ['Jira', 'Scrum', 'Leadership'],
-    birthDate: '06-12',
-    startDate: '2019-06-01',
-  },
-  {
-    id: '4',
-    name: 'David Kim',
-    position: 'Developer',
-    department: 'IT',
-    photo: 'https://picsum.photos/200/200?random=13',
-    skills: ['Python', 'AWS', 'Docker'],
-    birthDate: '06-20', 
-    startDate: '2023-08-01',
-  }
-];
+export const INITIAL_EMPLOYEES: Employee[] = [];
 
-export const INITIAL_DOCUMENTS: DocumentItem[] = [
-  { id: '1', name: 'Manual de Identidad.pdf', category: 'Brand', size: '2.4 MB', uploadDate: '2024-01-15', department: 'General' },
-  { id: '2', name: 'Política de Vacaciones.pdf', category: 'Policy', size: '1.1 MB', uploadDate: '2024-02-20', department: 'Recursos Humanos' },
-  { id: '3', name: 'Plantilla Presentación.pptx', category: 'Template', size: '5.6 MB', uploadDate: '2023-11-05', department: 'General' },
-  { id: '4', name: 'Guía de Estándares BIM.pdf', category: 'Manual', size: '12.5 MB', uploadDate: '2024-03-10', department: 'Proyectos' },
-  { id: '5', name: 'Protocolo de Seguridad en Obra.pdf', category: 'Manual', size: '3.2 MB', uploadDate: '2024-01-20', department: 'Ingeniería' },
-  { id: '6', name: 'Formato de Reembolsos.xlsx', category: 'Template', size: '0.5 MB', uploadDate: '2024-04-05', department: 'Recursos Humanos' },
-];
+export const INITIAL_DOCUMENTS: DocumentItem[] = [];
 
-export const INITIAL_TRAININGS: TrainingModule[] = [
-  { id: 't1', title: 'Onboarding Corporativo', description: 'Conoce la misión, visión y valores de Corpocrea.', department: 'General', duration: '30 min', completedBy: ['emp-1', 'emp-2', 'mgr-1'] },
-  { id: 't2', title: 'Seguridad de la Información', description: 'Buenas prácticas para proteger los datos de la empresa.', department: 'General', duration: '45 min', completedBy: ['mgr-1'] },
-  { id: 't3', title: 'Metodologías Ágiles en Construcción', description: 'Aplicación de Lean Construction en nuestros proyectos.', department: 'Proyectos', duration: '60 min', completedBy: [] },
-  { id: 't4', title: 'Normativas ISO 9001', description: 'Estándares de calidad para ingenieros.', department: 'Ingeniería', duration: '90 min', completedBy: ['emp-2'] },
-  { id: 't5', title: 'Liderazgo Efectivo', description: 'Técnicas para gestionar equipos de alto rendimiento.', department: 'Recursos Humanos', duration: '120 min', completedBy: [] },
-];
+export const INITIAL_TRAININGS: TrainingModule[] = [];
 
 export const INITIAL_CHANNELS: ChatChannel[] = [
   { id: 'general', name: 'General', type: 'GROUP', participants: ['all'] },
   { id: 'announcements', name: 'Anuncios', type: 'GROUP', participants: ['all'] },
 ];
 
-export const INITIAL_MESSAGES: ChatMessage[] = [
-  {
-    id: '1',
-    channelId: 'general',
-    senderId: 'mgr-1',
-    senderName: 'Carlos Admin',
-    text: '¡Bienvenidos al nuevo chat de Corpocrea!',
-    timestamp: new Date(Date.now() - 86400000)
-  }
-];
+export const INITIAL_MESSAGES: ChatMessage[] = [];
 
 // Initial Projects Data
-export const INITIAL_PROJECTS: Project[] = [
-  {
-    id: 'p1',
-    name: 'Torre Central Corp',
-    description: 'Diseño estructural y remodelación del lobby principal.',
-    status: 'ACTIVE',
-    deadline: '2024-12-01',
-    leaderId: 'mgr-1',
-    // Assigning: Manager, Ana (User), and David (Dev)
-    participantIds: ['mgr-1', 'emp-1', 'emp-2']
-  },
-  {
-    id: 'p2',
-    name: 'Centro Logístico Norte',
-    description: 'Planificación de infraestructura eléctrica y accesos.',
-    status: 'PLANNING',
-    deadline: '2025-02-15',
-    leaderId: 'ceo-1',
-    // Assigning: CEO and David (Dev). Ana is NOT in this project.
-    participantIds: ['ceo-1', 'emp-2']
-  }
-];
+export const INITIAL_PROJECTS: Project[] = [];
 
-// Helper to get current month dates for demo
-const today = new Date();
-const currentY = today.getFullYear();
-const currentM = today.getMonth() + 1;
-const pad = (n: number) => n.toString().padStart(2, '0');
-
-export const INITIAL_TASKS: Task[] = [
-  {
-    id: 't1',
-    projectId: 'p1',
-    title: 'Revisión de planos estructurales',
-    description: 'Validar cargas máximas en columnas del eje B.',
-    assignedToUserId: 'emp-1', // Ana (Architect)
-    status: 'IN_PROGRESS',
-    progress: 45,
-    startDate: `${currentY}-${pad(currentM)}-01`,
-    dueDate: `${currentY}-${pad(currentM)}-05`
-  },
-  {
-    id: 't2',
-    projectId: 'p1',
-    title: 'Presupuesto de Materiales',
-    description: 'Cotizar acero y concreto con proveedores locales.',
-    assignedToUserId: 'emp-2', // David (Engineer)
-    status: 'TODO',
-    progress: 0,
-    startDate: `${currentY}-${pad(currentM)}-10`,
-    dueDate: `${currentY}-${pad(currentM)}-15`
-  },
-  {
-    id: 't3',
-    projectId: 'p2',
-    title: 'Levantamiento topográfico',
-    description: 'Visita a terreno zona norte.',
-    assignedToUserId: 'emp-2', // David
-    status: 'DONE',
-    progress: 100,
-    startDate: `${currentY}-${pad(currentM)}-02`,
-    dueDate: `${currentY}-${pad(currentM)}-04`
-  }
-];
+export const INITIAL_TASKS: Task[] = [];

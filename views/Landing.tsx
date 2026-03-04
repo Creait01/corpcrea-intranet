@@ -1,108 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, NewsItem } from '../types';
-import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown, PlayCircle, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
-
-// ========================
-// News Detail Modal (Landing)
-// ========================
-const LandingNewsModal: React.FC<{ news: NewsItem; onClose: () => void }> = ({ news, onClose }) => {
-  const [carouselIdx, setCarouselIdx] = useState(0);
-  const allImages = news.additionalImages || [];
-  const paragraphs = (news.content || '').split(/\n\n+/).filter(p => p.trim());
-
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-6 px-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl my-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Hero */}
-        <div className="relative">
-          {news.type === 'VIDEO' && news.videoUrl ? (
-            <div className="aspect-video bg-black">
-              <video src={news.videoUrl} controls autoPlay className="w-full h-full object-contain" />
-            </div>
-          ) : news.imageUrl ? (
-            <div className="aspect-video overflow-hidden">
-              <img src={news.imageUrl} alt={news.title} className="w-full h-full object-cover" />
-            </div>
-          ) : null}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 transition-colors backdrop-blur-sm z-10"
-          >
-            <X size={18} />
-          </button>
-          {news.type === 'VIDEO' && (
-            <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 z-10">
-              <PlayCircle size={12}/> VIDEO
-            </div>
-          )}
-        </div>
-
-        <div className="p-6 md:p-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">{news.date}</span>
-            {allImages.length > 0 && (
-              <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 flex items-center gap-1">
-                <LayoutGrid size={11}/> {allImages.length} fotos
-              </span>
-            )}
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 leading-tight">{news.title}</h1>
-          <p className="text-slate-600 text-base leading-relaxed mb-6 border-l-4 border-[#CBA052] pl-4 italic bg-amber-50/40 py-3 pr-3 rounded-r-lg">{news.description}</p>
-
-          {paragraphs.length > 0 && (
-            <div className="space-y-4 mb-8">
-              {paragraphs.map((para, i) => (
-                <p key={i} className="text-slate-700 text-[15px] leading-8">{para}</p>
-              ))}
-            </div>
-          )}
-
-          {allImages.length > 0 && (
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <h3 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <LayoutGrid size={14} className="text-[#CBA052]"/> Galería de imágenes
-              </h3>
-              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 mb-3 shadow-lg">
-                <img key={carouselIdx} src={allImages[carouselIdx]} alt={`Galería ${carouselIdx + 1}`} className="w-full h-full object-cover" />
-                {allImages.length > 1 && (
-                  <>
-                    <button onClick={() => setCarouselIdx((carouselIdx - 1 + allImages.length) % allImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition-colors">
-                      <ChevronLeft size={20}/>
-                    </button>
-                    <button onClick={() => setCarouselIdx((carouselIdx + 1) % allImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2.5 transition-colors">
-                      <ChevronRight size={20}/>
-                    </button>
-                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-                      {allImages.map((_, i) => (
-                        <button key={i} onClick={() => setCarouselIdx(i)} className={`rounded-full transition-all duration-300 ${i === carouselIdx ? 'bg-white w-6 h-2' : 'bg-white/50 w-2 h-2'}`}/>
-                      ))}
-                    </div>
-                    <div className="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">{carouselIdx + 1} / {allImages.length}</div>
-                  </>
-                )}
-              </div>
-              {allImages.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                  {allImages.map((img, i) => (
-                    <button key={i} onClick={() => setCarouselIdx(i)} className={`flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden transition-all border-2 ${i === carouselIdx ? 'border-[#CBA052] shadow-md scale-105' : 'border-transparent opacity-60 hover:opacity-90'}`}>
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+import { AppState } from '../types';
+import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown } from 'lucide-react';
 
 interface LandingProps {
   data: AppState;
@@ -144,7 +42,6 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
 
   // Handle Scroll for Navbar styling
   useEffect(() => {
@@ -157,7 +54,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentNewsIndex((prev) => (prev + 1) % data.news.length);
-    }, 10000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [data.news.length]);
 
@@ -243,45 +140,25 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
             key={item.id}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentNewsIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
           >
-            {/* Background: video loop or static image */}
-            {item.type === 'VIDEO' && item.videoUrl ? (
-              <video
-                src={item.videoUrl}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms]"
-                style={{ transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
-              />
-            ) : (
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
-                style={{ backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : 'none', background: item.imageUrl ? undefined : 'linear-gradient(135deg,#1D3C34,#25282A)', transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
-              />
-            )}
+            <div 
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
+              style={{ backgroundImage: `url(${item.imageUrl})`, transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-[#25282A] via-[#25282A]/60 to-[#1D3C34]/40" />
             
             <div className="absolute inset-0 flex items-end">
               <div className="max-w-7xl mx-auto px-4 pb-32 md:pb-40 w-full">
                 <div className="max-w-3xl">
-                  <div className="flex items-center gap-3 mb-5">
-                    <span className="inline-block px-4 py-1.5 bg-[#CBA052] text-white text-xs font-black rounded-full tracking-wider uppercase shadow-lg shadow-[#CBA052]/30">
-                      Novedades
-                    </span>
-                    {item.type === 'VIDEO' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/50 text-white text-xs font-bold rounded-full tracking-wider uppercase backdrop-blur-sm border border-white/20">
-                        <PlayCircle size={11}/> Video
-                      </span>
-                    )}
-                  </div>
+                  <span className="inline-block px-4 py-1.5 bg-[#CBA052] text-white text-xs font-black rounded-full mb-5 tracking-wider uppercase shadow-lg shadow-[#CBA052]/30">
+                    Novedades
+                  </span>
                   <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-5 leading-[1.1] tracking-tight">
                     {item.title}
                   </h1>
                   <p className="text-lg md:text-xl text-[#A2B2C8] mb-8 max-w-2xl leading-relaxed">
                     {item.description}
                   </p>
-                  <button onClick={() => setSelectedNews(item)} className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide">
+                  <button className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide">
                     Leer más <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
@@ -290,33 +167,15 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           </div>
         ))}
         
-        {/* Bottom nav: prev arrow + dots + next arrow */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4">
-          <button
-            onClick={() => setCurrentNewsIndex((currentNewsIndex - 1 + data.news.length) % data.news.length)}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
-            aria-label="Noticia anterior"
-          >
-            <ChevronLeft size={18} />
-          </button>
-
-          <div className="flex items-center gap-2">
-            {data.news.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentNewsIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-500 ${idx === currentNewsIndex ? 'bg-[#CBA052] w-10' : 'bg-white/30 w-2 hover:bg-white/50'}`}
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={() => setCurrentNewsIndex((currentNewsIndex + 1) % data.news.length)}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white backdrop-blur-sm transition-all hover:scale-110"
-            aria-label="Siguiente noticia"
-          >
-            <ChevronRight size={18} />
-          </button>
+        {/* Indicators */}
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-3">
+          {data.news.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentNewsIndex(idx)}
+              className={`h-2 rounded-full transition-all duration-500 ${idx === currentNewsIndex ? 'bg-[#CBA052] w-10' : 'bg-white/30 w-2 hover:bg-white/50'}`}
+            />
+          ))}
         </div>
 
         {/* Scroll indicator */}
@@ -522,11 +381,6 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           </div>
         </div>
       </footer>
-
-      {/* News Detail Modal */}
-      {selectedNews && (
-        <LandingNewsModal news={selectedNews} onClose={() => setSelectedNews(null)} />
-      )}
     </div>
   );
 };

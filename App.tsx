@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  AppState, AppActions, UserRole, NewsItem, EventItem, CeoMessageContent, DocumentItem, Task, TaskStatus, SocialBenefitsRequest, OdooDashboardState 
+  AppState, AppActions, UserRole, NewsItem, EventItem, CeoMessageContent, DocumentItem, Task, TaskStatus, SocialBenefitsRequest, OdooDashboardState, CorporateCompany 
 } from './types';
 import { INITIAL_NEWS, INITIAL_EVENTS, INITIAL_EMPLOYEES, INITIAL_DOCUMENTS, MOCK_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES, INITIAL_CEO_MESSAGE, INITIAL_PROJECTS, INITIAL_TASKS, INITIAL_CALENDAR_EVENTS, INITIAL_VACATION_REQUESTS, INITIAL_TRAININGS, INITIAL_DEPARTMENTS, INITIAL_NOTIFICATIONS, INITIAL_DOCUMENT_REQUESTS, INITIAL_SOCIAL_BENEFITS_REQUESTS } from './data';
 import { Landing } from './views/Landing';
@@ -49,8 +49,27 @@ const App: React.FC = () => {
     departments: INITIAL_DEPARTMENTS,
     notifications: INITIAL_NOTIFICATIONS,
     documentRequests: INITIAL_DOCUMENT_REQUESTS,
-    socialBenefitsRequests: INITIAL_SOCIAL_BENEFITS_REQUESTS
+    socialBenefitsRequests: INITIAL_SOCIAL_BENEFITS_REQUESTS,
+    corporateCompanies: [],
+    siteLogoUrl: ''
   });
+
+  // Fetch corporate companies and site logo on mount
+  useEffect(() => {
+    fetch('/api/admin/corporate-companies')
+      .then(r => r.ok ? r.json() : [])
+      .then(companies => setData(prev => ({ ...prev, corporateCompanies: companies })))
+      .catch(() => {});
+
+    fetch('/api/admin/settings')
+      .then(r => r.ok ? r.json() : {})
+      .then(settings => {
+        if (settings.site_logo_url) {
+          setData(prev => ({ ...prev, siteLogoUrl: settings.site_logo_url }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Actions
   const addNews = (item: NewsItem) => {
@@ -333,13 +352,26 @@ const App: React.FC = () => {
     setData(prev => ({ ...prev, departments: prev.departments.filter(d => d.id !== id) }));
   };
 
+  const addCorporateCompany = (company: CorporateCompany) => {
+    setData(prev => ({ ...prev, corporateCompanies: [...prev.corporateCompanies, company] }));
+  };
+
+  const deleteCorporateCompany = (id: string) => {
+    setData(prev => ({ ...prev, corporateCompanies: prev.corporateCompanies.filter(c => c.id !== id) }));
+  };
+
+  const updateSiteLogoUrl = (url: string) => {
+    setData(prev => ({ ...prev, siteLogoUrl: url }));
+  };
+
   const actions: AppActions = {
     addNews, deleteNews, addEvent, deleteEvent, login, logout,
     sendMessage, createGroupChannel, createDirectChannel, updateCeoMessage,
     addDocument, deleteDocument, addTask, updateTaskProgress,
     addCalendarEvent, requestVacation, approveVacation, requestLoan,
     markTrainingComplete, addDepartment, deleteDepartment,
-    requestDocument, markNotificationRead, requestSocialBenefits
+    requestDocument, markNotificationRead, requestSocialBenefits,
+    addCorporateCompany, deleteCorporateCompany, updateSiteLogoUrl
   };
 
   // Router / View Switcher logic

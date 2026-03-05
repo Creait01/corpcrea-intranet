@@ -752,16 +752,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                    <h3 className="font-bold text-slate-700">Empresas de la Corporación</h3>
-                   <span className="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{data.corporateCompanies.length} empresas</span>
+                   <span className="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{(data.corporateCompanies || []).length} empresas</span>
                 </div>
                 <div className="divide-y divide-slate-100">
-                    {data.corporateCompanies.length === 0 && (
+                    {(!data.corporateCompanies || data.corporateCompanies.length === 0) && (
                       <div className="p-8 text-center text-slate-400">
                         <Building2 size={40} className="mx-auto mb-3 opacity-50"/>
                         <p className="text-sm">No hay empresas registradas aún. Agrega la primera empresa del grupo.</p>
                       </div>
                     )}
-                    {data.corporateCompanies.map(company => (
+                    {(data.corporateCompanies || []).map(company => (
                     <div key={company.id} className="p-4 flex gap-4 items-center hover:bg-slate-50 transition-colors group">
                         <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 bg-white flex items-center justify-center p-1">
                            <img src={company.logoUrl} className="max-w-full max-h-full object-contain" alt={company.name} />

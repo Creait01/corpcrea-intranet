@@ -235,6 +235,14 @@ export interface Department {
   managerId?: string;
 }
 
+export interface CorporateCompany {
+  id: string;
+  name: string;
+  logoUrl: string;
+  website?: string;
+  sortOrder?: number;
+}
+
 export interface SocialBenefitsRequest {
   id: string;
   userId: string;
@@ -263,6 +271,8 @@ export interface AppState {
   documentRequests: DocumentRequest[];
   notifications: Notification[];
   socialBenefitsRequests: SocialBenefitsRequest[];
+  corporateCompanies: CorporateCompany[];
+  siteLogoUrl: string;
 }
 
 export interface AppActions {
@@ -294,4 +304,9 @@ export interface AppActions {
   // Department Actions
   addDepartment: (dept: Department) => void;
   deleteDepartment: (id: string) => void;
+  // Corporate Companies Actions
+  addCorporateCompany: (company: CorporateCompany) => void;
+  deleteCorporateCompany: (id: string) => void;
+  // Site Settings
+  updateSiteLogoUrl: (url: string) => void;
 }

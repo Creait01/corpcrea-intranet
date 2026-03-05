@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserRole } from '../types';
-import { Lock, Mail, ArrowRight, AlertCircle, UserPlus, CreditCard, CheckCircle, Loader2, ArrowLeft, Settings, Wifi, WifiOff, Shield } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle, UserPlus, CreditCard, CheckCircle, Loader2, ArrowLeft, Shield } from 'lucide-react';
 import { odooApi } from '../services/odooApi';
 
 interface LoginProps {
@@ -13,8 +13,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   
   // Login state
-  const [email, setEmail] = useState('user@corpocrea.com');
-  const [password, setPassword] = useState('123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,12 +29,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
   const [regError, setRegError] = useState('');
   const [regSuccess, setRegSuccess] = useState(false);
 
-  // Odoo Config state
-  const [showConfig, setShowConfig] = useState(false);
-  const [odooUrl, setOdooUrl] = useState(localStorage.getItem('odoo_url') || '');
-  const [odooApiKey, setOdooApiKey] = useState(localStorage.getItem('odoo_api_key') || '');
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'ok' | 'error'>('idle');
-  const [connectionMessage, setConnectionMessage] = useState('');
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,18 +125,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
     setRegError('');
   };
 
-  const handleSaveOdooConfig = () => {
-    odooApi.setConfig(odooUrl, odooApiKey);
-    setShowConfig(false);
-  };
 
-  const handleTestConnection = async () => {
-    odooApi.setConfig(odooUrl, odooApiKey);
-    setConnectionStatus('testing');
-    const result = await odooApi.testConnection();
-    setConnectionStatus(result.success ? 'ok' : 'error');
-    setConnectionMessage(result.message);
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -259,14 +243,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
                   )}
                 </button>
 
-                <div className="pt-4 border-t border-white/10 text-center">
-                  <div className="text-[11px] text-white/30 space-y-0.5">
-                    <p className="font-bold text-white/40 mb-1">Demo:</p>
-                    <p>CEO: ceo@corpocrea.com / 123</p>
-                    <p>Admin: admin@corpocrea.com / 123</p>
-                    <p>User: user@corpocrea.com / 123</p>
-                  </div>
-                </div>
+
               </form>
             )}
 
@@ -441,76 +418,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex items-center justify-between mt-6 px-2">
+        <div className="flex items-center justify-center mt-6 px-2">
           <button onClick={onBack} className="text-sm text-white/40 hover:text-white/80 font-medium transition-colors flex items-center gap-1">
             <ArrowLeft size={14} /> Volver al inicio
           </button>
-          <button 
-            onClick={() => setShowConfig(!showConfig)} 
-            className="text-sm text-white/40 hover:text-white/80 font-medium transition-colors flex items-center gap-1"
-          >
-            <Settings size={14} /> Configuración Odoo
-          </button>
         </div>
-
-        {/* Odoo Config Panel */}
-        {showConfig && (
-          <div className="mt-4 bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20">
-            <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-              <Settings size={18} /> Configurar Conexión a Odoo
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-white/60 mb-1">URL del Servidor Odoo</label>
-                <input 
-                  type="text"
-                  value={odooUrl}
-                  onChange={(e) => setOdooUrl(e.target.value)}
-                  className="w-full p-2.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="https://odoo.corpocrea.com"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-white/60 mb-1">API Key (opcional)</label>
-                <input 
-                  type="password"
-                  value={odooApiKey}
-                  onChange={(e) => setOdooApiKey(e.target.value)}
-                  className="w-full p-2.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="Tu API key"
-                />
-              </div>
-              
-              {connectionStatus !== 'idle' && (
-                <div className={`flex items-center gap-2 text-sm p-2 rounded-lg ${
-                  connectionStatus === 'testing' ? 'bg-blue-500/20 text-blue-300' :
-                  connectionStatus === 'ok' ? 'bg-green-500/20 text-green-300' :
-                  'bg-red-500/20 text-red-300'
-                }`}>
-                  {connectionStatus === 'testing' && <Loader2 size={14} className="animate-spin" />}
-                  {connectionStatus === 'ok' && <Wifi size={14} />}
-                  {connectionStatus === 'error' && <WifiOff size={14} />}
-                  {connectionMessage}
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-2">
-                <button 
-                  onClick={handleTestConnection}
-                  className="flex-1 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-lg text-sm font-medium transition-all"
-                >
-                  Probar Conexión
-                </button>
-                <button 
-                  onClick={handleSaveOdooConfig}
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-bold transition-all"
-                >
-                  Guardar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

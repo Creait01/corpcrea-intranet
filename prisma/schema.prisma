@@ -383,6 +383,21 @@ model Department {
 }
 
 // ============================
+// Corporate Companies (Group logos for landing carousel)
+// ============================
+
+model CorporateCompany {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String   @map("logo_url")
+  website   String?  @default("")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("corporate_companies")
+}
+
+// ============================
 // Platform Settings (Odoo config, etc.)
 // ============================
 

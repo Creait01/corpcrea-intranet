@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department } from '../types';
-import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff } from 'lucide-react';
+import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department, CorporateCompany } from '../types';
+import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff, Building2 } from 'lucide-react';
 import { odooApi } from '../services/odooApi';
 import { CloudinaryUpload } from '../components/CloudinaryUpload';
 import { cloudinaryService } from '../services/cloudinaryUpload';
@@ -14,7 +14,7 @@ interface AdminPanelProps {
 // Legacy ImageUploadField removed — now using CloudinaryUpload component
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack }) => {
-  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'settings'>('news');
+  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'settings'>('news');
   const user = data.currentUser;
   
   // Local state for forms
@@ -27,6 +27,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
 
   // Department Form State
   const [newDept, setNewDept] = useState<Partial<Department>>({ name: '', description: '' });
+
+  // Corporate Company Form State
+  const [newCompany, setNewCompany] = useState<Partial<CorporateCompany>>({ name: '', logoUrl: '', website: '' });
+
+  // Site Logo State
+  const [siteLogoUrl, setSiteLogoUrl] = useState(data.siteLogoUrl || '');
+  const [logoSaved, setLogoSaved] = useState(false);
+
+  useEffect(() => { setSiteLogoUrl(data.siteLogoUrl || ''); }, [data.siteLogoUrl]);
 
   // CEO Message Form
   const [ceoText, setCeoText] = useState(data.ceoMessage.text);
@@ -207,6 +216,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
     }
   };
 
+  const handleAddCompany = async () => {
+    if (newCompany.name && newCompany.logoUrl) {
+      try {
+        const res = await fetch('/api/admin/corporate-companies', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify({ name: newCompany.name, logoUrl: newCompany.logoUrl, website: newCompany.website || '' }),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          actions.addCorporateCompany(created);
+          setNewCompany({ name: '', logoUrl: '', website: '' });
+        }
+      } catch (err) {
+        console.error('Error adding company:', err);
+      }
+    }
+  };
+
+  const handleDeleteCompany = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/corporate-companies/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) actions.deleteCorporateCompany(id);
+    } catch (err) {
+      console.error('Error deleting company:', err);
+    }
+  };
+
+  const handleSaveSiteLogo = async () => {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({ site_logo_url: siteLogoUrl }),
+      });
+      if (res.ok) {
+        actions.updateSiteLogoUrl(siteLogoUrl);
+        setLogoSaved(true);
+        setTimeout(() => setLogoSaved(false), 3000);
+      }
+    } catch (err) {
+      console.error('Error saving site logo:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       <header className="bg-slate-900 text-white p-4 shadow-md sticky top-0 z-20">
@@ -250,6 +313,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
             className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'departments' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
           >
              <Users size={18}/> Departamentos
+          </button>
+          <button 
+            onClick={() => setActiveSection('companies')}
+            className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'companies' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+          >
+             <Building2 size={18}/> Empresas del Grupo
           </button>
           {user?.role === UserRole.CEO && (
              <button 
@@ -628,8 +697,138 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
              </div>
           )}
 
+          {/* ====== EMPRESAS DE LA CORPORACIÓN ====== */}
+          {activeSection === 'companies' && (
+            <>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
+                  <Plus className="text-blue-600" /> Agregar Empresa del Grupo
+                </h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Empresa</label>
+                      <input 
+                        placeholder="Ej: Corpocrea Construcciones" 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
+                        value={newCompany.name} 
+                        onChange={e => setNewCompany({...newCompany, name: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Sitio Web (opcional)</label>
+                      <input 
+                        placeholder="https://www.ejemplo.com" 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"
+                        value={newCompany.website} 
+                        onChange={e => setNewCompany({...newCompany, website: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <CloudinaryUpload 
+                        label="Logo de la Empresa"
+                        accept="image/*"
+                        folder="corpocrea/companies"
+                        currentUrl={newCompany.logoUrl || ''}
+                        onUpload={(result) => setNewCompany({...newCompany, logoUrl: result.url})}
+                    />
+                    <div className="mt-auto pt-4">
+                        <button 
+                            onClick={handleAddCompany} 
+                            disabled={!newCompany.name || !newCompany.logoUrl}
+                            className="w-full bg-blue-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg shadow-blue-600/20"
+                        >
+                        <Save size={20} /> Agregar Empresa
+                        </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* List of Companies */}
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                   <h3 className="font-bold text-slate-700">Empresas de la Corporación</h3>
+                   <span className="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-1 rounded-full">{data.corporateCompanies.length} empresas</span>
+                </div>
+                <div className="divide-y divide-slate-100">
+                    {data.corporateCompanies.length === 0 && (
+                      <div className="p-8 text-center text-slate-400">
+                        <Building2 size={40} className="mx-auto mb-3 opacity-50"/>
+                        <p className="text-sm">No hay empresas registradas aún. Agrega la primera empresa del grupo.</p>
+                      </div>
+                    )}
+                    {data.corporateCompanies.map(company => (
+                    <div key={company.id} className="p-4 flex gap-4 items-center hover:bg-slate-50 transition-colors group">
+                        <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200 bg-white flex items-center justify-center p-1">
+                           <img src={company.logoUrl} className="max-w-full max-h-full object-contain" alt={company.name} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-slate-800 truncate">{company.name}</h4>
+                          {company.website && <p className="text-sm text-blue-500 truncate">{company.website}</p>}
+                        </div>
+                        <button onClick={() => handleDeleteCompany(company.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                    ))}
+                </div>
+              </div>
+            </>
+          )}
+
           {activeSection === 'settings' && (
             <div className="space-y-6">
+              {/* Site Logo Configuration */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 bg-[#1D3C34] text-white rounded-xl">
+                    <ImageIcon size={22}/>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">Logo del Sitio</h2>
+                    <p className="text-sm text-slate-500">Sube el logo que aparecerá en la barra de navegación del landing y el footer.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <CloudinaryUpload 
+                      label="Logo de la Corporación"
+                      accept="image/*"
+                      folder="corpocrea/branding"
+                      currentUrl={siteLogoUrl}
+                      onUpload={(result) => setSiteLogoUrl(result.url)}
+                    />
+                  </div>
+                  <div className="flex flex-col justify-between">
+                    {siteLogoUrl && (
+                      <div className="bg-[#25282A] rounded-xl p-6 flex items-center justify-center mb-4">
+                        <img src={siteLogoUrl} alt="Logo preview" className="max-h-16 object-contain"/>
+                      </div>
+                    )}
+                    {!siteLogoUrl && (
+                      <div className="bg-slate-50 rounded-xl p-6 flex items-center justify-center mb-4 border border-dashed border-slate-300">
+                        <div className="text-center text-slate-400">
+                          <ImageIcon size={32} className="mx-auto mb-2 opacity-50"/>
+                          <p className="text-xs">Vista previa del logo</p>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleSaveSiteLogo}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 transition-all"
+                    >
+                      {logoSaved ? <CheckCircle size={18}/> : <Save size={18}/>}
+                      {logoSaved ? 'Logo Guardado ✓' : 'Guardar Logo'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Odoo Connection */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <div className="flex items-center gap-3 mb-6">

@@ -1,47 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState } from '../types';
-import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown } from 'lucide-react';
+import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface LandingProps {
   data: AppState;
   onNavigateLogin: () => void;
 }
 
-// Animated counter hook
-const useCounter = (target: number, duration: number = 2000, startOnView: boolean = true) => {
-  const [count, setCount] = useState(0);
-  const [started, setStarted] = useState(!startOnView);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!startOnView) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setStarted(true); },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [startOnView]);
-
-  useEffect(() => {
-    if (!started) return;
-    let start = 0;
-    const step = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) { setCount(target); clearInterval(timer); }
-      else setCount(Math.floor(start));
-    }, 16);
-    return () => clearInterval(timer);
-  }, [started, target, duration]);
-
-  return { count, ref };
-};
-
 export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Handle Scroll for Navbar styling
   useEffect(() => {
@@ -74,10 +44,26 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
     return startMonth === 6;
   });
 
-  // Animated counters for stats
-  const statEmployees = useCounter(data.employees.length || 250, 1800);
-  const statProjects = useCounter(48, 2000);
-  const statYears = useCounter(15, 1500);
+  // Company carousel auto-scroll
+  useEffect(() => {
+    if (!data.corporateCompanies || data.corporateCompanies.length <= 3) return;
+    const el = carouselRef.current;
+    if (!el) return;
+    const interval = setInterval(() => {
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: 220, behavior: 'smooth' });
+      }
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [data.corporateCompanies]);
+
+  const scrollCarousel = (dir: 'left' | 'right') => {
+    const el = carouselRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -220 : 220, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-800">
@@ -86,12 +72,18 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
       <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[#25282A]/95 backdrop-blur-xl shadow-2xl py-2' : 'bg-transparent py-5'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-xl flex items-center justify-center shadow-lg shadow-[#CBA052]/30">
-              <span className="text-white font-black text-xl">C</span>
-            </div>
-            <span className="text-xl font-black tracking-tight text-white">
-              CORPO<span className="text-[#CBA052]">CREA</span>
-            </span>
+            {data.siteLogoUrl ? (
+              <img src={data.siteLogoUrl} alt="Corpocrea" className="h-10 object-contain" />
+            ) : (
+              <>
+                <div className="w-10 h-10 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-xl flex items-center justify-center shadow-lg shadow-[#CBA052]/30">
+                  <span className="text-white font-black text-xl">C</span>
+                </div>
+                <span className="text-xl font-black tracking-tight text-white">
+                  CORPO<span className="text-[#CBA052]">CREA</span>
+                </span>
+              </>
+            )}
           </div>
 
           {/* Desktop Menu */}
@@ -184,31 +176,47 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
         </div>
       </section>
 
-      {/* --- STATS BAR --- */}
+      {/* --- COMPANIES CAROUSEL --- */}
       <section className="relative -mt-16 z-10">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-2xl shadow-slate-900/10 p-8 grid grid-cols-1 md:grid-cols-3 gap-8 border border-slate-100">
-            <div ref={statEmployees.ref} className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Users className="text-[#CBA052]" size={22}/>
-                <span className="text-4xl font-black text-[#25282A]">{statEmployees.count}+</span>
+          <div className="bg-white rounded-2xl shadow-2xl shadow-slate-900/10 p-6 md:p-8 border border-slate-100">
+            {data.corporateCompanies && data.corporateCompanies.length > 0 ? (
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-5">Empresas de la Corporación</p>
+                <div className="relative">
+                  {data.corporateCompanies.length > 3 && (
+                    <button onClick={() => scrollCarousel('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 bg-white shadow-lg border border-slate-200 rounded-full p-1.5 hover:bg-slate-50 transition-colors hidden md:flex">
+                      <ChevronLeft size={18} className="text-slate-600"/>
+                    </button>
+                  )}
+                  <div ref={carouselRef} className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth py-2 px-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {data.corporateCompanies.map((company) => (
+                      <a
+                        key={company.id}
+                        href={company.website || '#'}
+                        target={company.website ? '_blank' : undefined}
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 flex flex-col items-center gap-2 group min-w-[140px]"
+                      >
+                        <div className="w-24 h-16 md:w-28 md:h-20 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100 group-hover:border-[#CBA052]/30 group-hover:shadow-md transition-all p-2">
+                          <img src={company.logoUrl} alt={company.name} className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <span className="text-[11px] font-semibold text-slate-500 group-hover:text-[#1D3C34] transition-colors text-center leading-tight">{company.name}</span>
+                      </a>
+                    ))}
+                  </div>
+                  {data.corporateCompanies.length > 3 && (
+                    <button onClick={() => scrollCarousel('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 bg-white shadow-lg border border-slate-200 rounded-full p-1.5 hover:bg-slate-50 transition-colors hidden md:flex">
+                      <ChevronRight size={18} className="text-slate-600"/>
+                    </button>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-slate-500 font-medium">Colaboradores</p>
-            </div>
-            <div ref={statProjects.ref} className="text-center border-y md:border-y-0 md:border-x border-slate-100 py-4 md:py-0">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Building2 className="text-[#1D3C34]" size={22}/>
-                <span className="text-4xl font-black text-[#25282A]">{statProjects.count}+</span>
+            ) : (
+              <div className="text-center py-2">
+                <p className="text-sm text-slate-400">Corporación de empresas al servicio de Venezuela</p>
               </div>
-              <p className="text-sm text-slate-500 font-medium">Proyectos Activos</p>
-            </div>
-            <div ref={statYears.ref} className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Shield className="text-[#A2B2C8]" size={22}/>
-                <span className="text-4xl font-black text-[#25282A]">{statYears.count}+</span>
-              </div>
-              <p className="text-sm text-slate-500 font-medium">Años de Experiencia</p>
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -349,12 +357,18 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-black text-xl">C</span>
-                </div>
-                <span className="text-xl font-black text-white">
-                  CORPO<span className="text-[#CBA052]">CREA</span>
-                </span>
+                {data.siteLogoUrl ? (
+                  <img src={data.siteLogoUrl} alt="Corpocrea" className="h-10 object-contain" />
+                ) : (
+                  <>
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-xl flex items-center justify-center">
+                      <span className="text-white font-black text-xl">C</span>
+                    </div>
+                    <span className="text-xl font-black text-white">
+                      CORPO<span className="text-[#CBA052]">CREA</span>
+                    </span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-slate-500 leading-relaxed max-w-xs">
                 Transformando el futuro corporativo con innovación, tecnología y el mejor talento humano.

@@ -16,4 +16,5 @@ RUN unset DATABASE_URL
 
 EXPOSE 3000
 
-CMD ["node", "server-dist/server/index.js"]
+# Push schema changes to DB then start server
+CMD npx prisma db push --skip-generate && node server-dist/server/index.js

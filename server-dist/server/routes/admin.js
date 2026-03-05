@@ -3,8 +3,8 @@ import { prisma } from '../prisma.js';
 import { authMiddleware, requireRole } from '../middleware/auth.js';
 const router = Router();
 // ================== SETTINGS ==================
-// GET /api/admin/settings
-router.get('/settings', authMiddleware, async (_req, res) => {
+// GET /api/admin/settings (public — needed for site logo on landing page)
+router.get('/settings', async (_req, res) => {
     try {
         const settings = await prisma.setting.findMany();
         const obj = {};
@@ -118,6 +118,43 @@ router.put('/users/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (r
             select: { id: true, name: true, email: true, role: true, position: true, department: true },
         });
         res.json(user);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// ================== CORPORATE COMPANIES ==================
+// GET /api/admin/corporate-companies (public for landing)
+router.get('/corporate-companies', async (_req, res) => {
+    try {
+        const companies = await prisma.corporateCompany.findMany({ orderBy: { sortOrder: 'asc' } });
+        res.json(companies);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// POST /api/admin/corporate-companies
+router.post('/corporate-companies', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+    try {
+        const { name, logoUrl, website, sortOrder } = req.body;
+        const company = await prisma.corporateCompany.create({
+            data: { name, logoUrl, website: website || '', sortOrder: sortOrder || 0 },
+        });
+        res.status(201).json(company);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// DELETE /api/admin/corporate-companies/:id
+router.delete('/corporate-companies/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+    try {
+        await prisma.corporateCompany.delete({ where: { id: String(req.params.id) } });
+        res.json({ success: true });
     }
     catch (err) {
         console.error(err);

@@ -6,8 +6,8 @@ const router = Router();
 
 // ================== SETTINGS ==================
 
-// GET /api/admin/settings
-router.get('/settings', authMiddleware, async (_req, res) => {
+// GET /api/admin/settings (public — needed for site logo on landing page)
+router.get('/settings', async (_req, res) => {
   try {
     const settings = await prisma.setting.findMany();
     const obj: Record<string, string> = {};

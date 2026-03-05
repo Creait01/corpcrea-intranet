@@ -8,6 +8,7 @@ import { Login } from './views/Login';
 import { Dashboard } from './views/Dashboard';
 import { AdminPanel } from './views/AdminPanel';
 import { odooApi } from './services/odooApi';
+import { cloudinaryService } from './services/cloudinaryUpload';
 
 type View = 'LANDING' | 'LOGIN' | 'DASHBOARD' | 'ADMIN';
 
@@ -54,16 +55,25 @@ const App: React.FC = () => {
     siteLogoUrl: ''
   });
 
-  // Fetch corporate companies and site logo on mount
+  // Fetch corporate companies and site logo on mount + restore token
   useEffect(() => {
+    // Restore token for cloudinaryService if available
+    const savedToken = localStorage.getItem('token');
+    if (savedToken) {
+      cloudinaryService.setToken(savedToken);
+    }
+
     fetch('/api/admin/corporate-companies')
       .then(r => r.ok ? r.json() : [])
       .then(companies => setData(prev => ({ ...prev, corporateCompanies: companies })))
       .catch(() => {});
 
-    fetch('/api/admin/settings')
+    // Settings: use token if available so we get the logo
+    const headers: Record<string, string> = {};
+    if (savedToken) headers['Authorization'] = `Bearer ${savedToken}`;
+    fetch('/api/admin/settings', { headers })
       .then(r => r.ok ? r.json() : {})
-      .then(settings => {
+      .then((settings: Record<string, string>) => {
         if (settings.site_logo_url) {
           setData(prev => ({ ...prev, siteLogoUrl: settings.site_logo_url }));
         }
@@ -124,24 +134,41 @@ const App: React.FC = () => {
 
   // Auth Logic with credentials
   const login = async (email: string, pass: string): Promise<boolean> => {
+    // Try real API login first
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass }),
+      });
+      if (res.ok) {
+        const { token, user } = await res.json();
+        localStorage.setItem('token', token);
+        cloudinaryService.setToken(token);
+        setData(prev => ({ ...prev, currentUser: user }));
+        setCurrentView('DASHBOARD');
+        if (user.identificationId) fetchOdooData(user.identificationId);
+        return true;
+      }
+    } catch (err) {
+      console.warn('API login unavailable, falling back to mock users');
+    }
+
+    // Fallback: mock users (for development without DB)
     return new Promise(resolve => {
-        setTimeout(() => {
-            // Check mock users first, then registered users
-            const allUsers = [...MOCK_USERS, ...registeredUsers];
-            const userFound = allUsers.find(u => u.email === email && u.password === pass);
-            if (userFound) {
-                const { password, ...safeUser } = userFound; 
-                setData(prev => ({ ...prev, currentUser: safeUser as any }));
-                setCurrentView('DASHBOARD');
-                // Fetch Odoo data if user has identificationId
-                if (userFound.identificationId) {
-                  fetchOdooData(userFound.identificationId);
-                }
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        }, 800);
+      setTimeout(() => {
+        const allUsers = [...MOCK_USERS, ...registeredUsers];
+        const userFound = allUsers.find(u => u.email === email && u.password === pass);
+        if (userFound) {
+          const { password, ...safeUser } = userFound;
+          setData(prev => ({ ...prev, currentUser: safeUser as any }));
+          setCurrentView('DASHBOARD');
+          if (userFound.identificationId) fetchOdooData(userFound.identificationId);
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 800);
     });
   };
 
@@ -176,6 +203,8 @@ const App: React.FC = () => {
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
+    cloudinaryService.setToken(null);
     setData(prev => ({ ...prev, currentUser: null }));
     setCurrentView('LANDING');
   };

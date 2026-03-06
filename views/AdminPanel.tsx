@@ -19,6 +19,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   
   // Local state for forms
   const [newNews, setNewNews] = useState<Partial<NewsItem>>({ title: '', description: '', imageUrl: '', date: '' });
+  const [newsExtraImages, setNewsExtraImages] = useState<string[]>([]);
   const [newEvent, setNewEvent] = useState<Partial<EventItem>>({ title: '', description: '', location: '', date: '' });
   
   // Document Form State
@@ -284,13 +285,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
             title: newNews.title,
             description: newNews.description,
             imageUrl: newNews.imageUrl,
+            additionalImages: newsExtraImages.length > 0 ? newsExtraImages : null,
+            videoUrl: newNews.videoUrl || null,
             date: newNews.date || new Date().toISOString().split('T')[0],
           }),
         });
         if (res.ok) {
           const created = await res.json();
           actions.addNews(created);
-          setNewNews({ title: '', description: '', imageUrl: '', date: '' });
+          setNewNews({ title: '', description: '', imageUrl: '', date: '', videoUrl: '' });
+          setNewsExtraImages([]);
         } else {
           alert('Error al publicar la noticia. Verifica tu sesión.');
         }
@@ -741,7 +745,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                   <Plus className="text-blue-600" /> Publicar Nueva Noticia
                 </h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Left Column: Form Fields */}
                   <div className="space-y-4">
                     <div>
@@ -773,18 +777,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                         onChange={e => setNewNews({...newNews, description: e.target.value})}
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">URL de Video (opcional)</label>
+                      <input 
+                        placeholder="https://youtube.com/... o URL de video" 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={newNews.videoUrl || ''}
+                        onChange={e => setNewNews({...newNews, videoUrl: e.target.value})}
+                      />
+                    </div>
                   </div>
 
-                  {/* Right Column: Image Uploader */}
-                  <div className="flex flex-col">
+                  {/* Center Column: Cover Image */}
+                  <div className="space-y-4">
                     <CloudinaryUpload 
-                        label="Imagen de portada"
+                        label="Imagen de portada (principal)"
                         accept="image/*"
                         folder="corpocrea/news"
                         currentUrl={newNews.imageUrl || ''}
                         onUpload={(result) => setNewNews({...newNews, imageUrl: result.url})}
                     />
-                    <div className="mt-auto pt-4">
+                    <div className="pt-4">
                         <button 
                             onClick={handleAddNews} 
                             disabled={!newNews.title || !newNews.imageUrl}
@@ -793,6 +807,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                         <Save size={20} /> Publicar
                         </button>
                     </div>
+                  </div>
+
+                  {/* Right Column: Additional Images */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-slate-700">Imágenes adicionales (hasta 4)</label>
+                    {[0, 1, 2, 3].map(idx => (
+                      <div key={idx}>
+                        {idx < newsExtraImages.length ? (
+                          <div className="relative group">
+                            <img src={newsExtraImages[idx]} alt={`Extra ${idx + 1}`} className="w-full h-24 object-cover rounded-lg border border-slate-200" />
+                            <button 
+                              onClick={() => setNewsExtraImages(prev => prev.filter((_, i) => i !== idx))}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            >×</button>
+                          </div>
+                        ) : idx === newsExtraImages.length ? (
+                          <CloudinaryUpload
+                            label={`Imagen ${idx + 2}`}
+                            accept="image/*"
+                            folder="corpocrea/news"
+                            currentUrl=""
+                            onUpload={(result) => setNewsExtraImages(prev => [...prev, result.url])}
+                          />
+                        ) : (
+                          <div className="h-24 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center text-slate-300 text-sm">
+                            Imagen {idx + 2}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

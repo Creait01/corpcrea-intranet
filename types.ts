@@ -133,6 +133,7 @@ export interface NewsItem {
   title: string;
   description: string;
   imageUrl?: string;
+  additionalImages?: string[]; // Up to 4 extra images
   videoUrl?: string;
   type?: 'IMAGE' | 'VIDEO';
   date: string;

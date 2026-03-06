@@ -117,27 +117,42 @@ const App: React.FC = () => {
       })
       .catch(() => {});
 
-    // Fetch events from API
+    // Fetch events from API (DB)
     fetch('/api/events')
-      .then(r => r.ok ? r.json() : [])
-      .then(events => setData(prev => ({ ...prev, events })))
-      .catch(() => {});
+      .then(r => {
+        if (!r.ok) { console.warn('[API] /api/events responded', r.status); return []; }
+        return r.json();
+      })
+      .then(events => {
+        console.log(`[API] Loaded ${events.length} events from DB`);
+        setData(prev => ({ ...prev, events }));
+      })
+      .catch(err => console.error('[API] Failed to fetch events:', err));
 
-    // Fetch news from API
+    // Fetch news from API (DB)
     fetch('/api/news')
-      .then(r => r.ok ? r.json() : [])
-      .then(news => setData(prev => ({ ...prev, news })))
-      .catch(() => {});
+      .then(r => {
+        if (!r.ok) { console.warn('[API] /api/news responded', r.status); return []; }
+        return r.json();
+      })
+      .then(news => {
+        console.log(`[API] Loaded ${news.length} news from DB`);
+        setData(prev => ({ ...prev, news }));
+      })
+      .catch(err => console.error('[API] Failed to fetch news:', err));
 
-    // Fetch calendar events from API
+    // Fetch calendar events from API (DB)
     fetch('/api/calendar')
-      .then(r => r.ok ? r.json() : [])
+      .then(r => {
+        if (!r.ok) { console.warn('[API] /api/calendar responded', r.status); return []; }
+        return r.json();
+      })
       .then(calEvents => {
         if (calEvents.length > 0) {
           setData(prev => ({ ...prev, calendarEvents: calEvents }));
         }
       })
-      .catch(() => {});
+      .catch(err => console.error('[API] Failed to fetch calendar:', err));
   }, []);
 
   // Actions

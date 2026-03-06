@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, UserRole, ChatMessage, User, ChatChannel, Task, Project, TaskStatus, CalendarEvent, VacationRequest, Loan, SocialBenefitsRequest, OdooDashboardState, OdooLoanItem } from '../types';
+import { AppState, UserRole, ChatMessage, User, ChatChannel, Task, Project, TaskStatus, CalendarEvent, VacationRequest, Loan, SocialBenefitsRequest, OdooDashboardState, OdooLoanItem, NewsItem } from '../types';
 import { MOCK_USERS } from '../data';
 import { 
   FileText, MessageSquare, Users, UserCheck, 
   LogOut, Bell, Search, Video, Download, HelpCircle,
-  Menu, X, Plus, Hash, User as UserIcon, Send, Briefcase, CheckCircle, Clock, AlertCircle, ArrowLeft, Calendar, BarChart2, ChevronLeft, ChevronRight, LayoutGrid, Sparkles, Bot, Folder, TrendingUp, DollarSign, CalendarDays, Flag, GraduationCap, PlayCircle, Check, RefreshCw, Loader2, Database, ExternalLink, UserPlus2
+  Menu, X, Plus, Hash, User as UserIcon, Send, Briefcase, CheckCircle, Clock, AlertCircle, ArrowLeft, Calendar, BarChart2, ChevronLeft, ChevronRight, LayoutGrid, Sparkles, Bot, Folder, TrendingUp, DollarSign, CalendarDays, Flag, GraduationCap, PlayCircle, Check, RefreshCw, Loader2, Database, ExternalLink, UserPlus2, Play
 } from 'lucide-react';
 import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
 
@@ -468,6 +468,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // News detail
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [newsGalleryIdx, setNewsGalleryIdx] = useState(0);
+
   // Docs State
   const [selectedDocDept, setSelectedDocDept] = useState<string>('All');
   const [activeDocTab, setActiveDocTab] = useState<'documents' | 'templates'>('documents');
@@ -786,7 +790,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {data.news.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.news.map(n => (
-                  <div key={n.id} className="group cursor-pointer">
+                  <div key={n.id} className="group cursor-pointer" onClick={() => { setSelectedNews(n); setNewsGalleryIdx(0); }}>
                     <div className="h-40 rounded-xl overflow-hidden mb-3">
                       <img src={n.imageUrl} alt={n.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     </div>
@@ -1742,6 +1746,60 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
       </main>
+
+      {/* News Detail Modal */}
+      {selectedNews && (() => {
+        const allImages = [selectedNews.imageUrl, ...(selectedNews.additionalImages || [])].filter(Boolean) as string[];
+        return (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedNews(null)}>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+            <div className="relative bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+              <button onClick={() => setSelectedNews(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-800 rounded-full w-10 h-10 flex items-center justify-center shadow-lg text-xl font-bold">×</button>
+
+              {allImages.length > 0 && (
+                <div className="relative">
+                  <img src={allImages[newsGalleryIdx]} alt={selectedNews.title} className="w-full aspect-[16/9] object-contain bg-slate-900 rounded-t-3xl" />
+                  {allImages.length > 1 && (
+                    <>
+                      <button onClick={() => setNewsGalleryIdx(p => (p - 1 + allImages.length) % allImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center"><ChevronLeft size={24}/></button>
+                      <button onClick={() => setNewsGalleryIdx(p => (p + 1) % allImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center"><ChevronRight size={24}/></button>
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                        {allImages.map((_, i) => (
+                          <button key={i} onClick={() => setNewsGalleryIdx(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === newsGalleryIdx ? 'bg-blue-500 scale-125' : 'bg-white/50 hover:bg-white/80'}`} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {allImages.length > 1 && (
+                <div className="flex gap-2 p-4 bg-slate-50 overflow-x-auto">
+                  {allImages.map((img, i) => (
+                    <button key={i} onClick={() => setNewsGalleryIdx(i)} className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === newsGalleryIdx ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">{selectedNews.date}</span>
+                  {selectedNews.videoUrl && (
+                    <a href={selectedNews.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full hover:bg-red-100 transition-colors">
+                      <Play size={12}/> Ver Video
+                    </a>
+                  )}
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-4 leading-tight">{selectedNews.title}</h2>
+                <p className="text-slate-600 leading-relaxed whitespace-pre-line">{selectedNews.description}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
     </div>
   );
 };

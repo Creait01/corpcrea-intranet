@@ -21,6 +21,7 @@ import adminRoutes from './routes/admin.js';
 import uploadRoutes from './routes/upload.js';
 import odooProxyRoutes from './routes/odoo-proxy.js';
 import { autoSeed } from './auto-seed.js';
+import { prisma } from './prisma.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,9 +49,29 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/odoo', odooProxyRoutes);
 
-// Health check
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check — verifies DB connectivity
+app.get('/api/health', async (_req, res) => {
+  const result: any = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    database: 'unknown',
+    databaseUrlSet: !!process.env.DATABASE_URL,
+  };
+  try {
+    if (prisma) {
+      const count = await prisma.user.count();
+      result.database = 'connected';
+      result.userCount = count;
+    } else {
+      result.database = 'not_initialized';
+      result.status = 'degraded';
+    }
+  } catch (err: any) {
+    result.database = 'error';
+    result.dbError = err.message;
+    result.status = 'degraded';
+  }
+  res.json(result);
 });
 
 // Serve static frontend in production

@@ -2,11 +2,15 @@ import { Router } from 'express';
 import { prisma } from '../prisma.js';
 import { authMiddleware, requireRole } from '../middleware/auth.js';
 const router = Router();
+const parseNewsImages = (item) => ({
+    ...item,
+    additionalImages: item.additionalImages ? JSON.parse(item.additionalImages) : [],
+});
 // GET /api/news
 router.get('/', async (_req, res) => {
     try {
         const news = await prisma.newsItem.findMany({ orderBy: { date: 'desc' } });
-        res.json(news);
+        res.json(news.map(parseNewsImages));
     }
     catch (err) {
         console.error(err);
@@ -21,7 +25,7 @@ router.get('/:id', async (req, res) => {
             res.status(404).json({ error: 'No encontrado' });
             return;
         }
-        res.json(item);
+        res.json(parseNewsImages(item));
     }
     catch (err) {
         console.error(err);
@@ -31,18 +35,20 @@ router.get('/:id', async (req, res) => {
 // POST /api/news  (admin only)
 router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
-        const { title, description, imageUrl, videoUrl, type } = req.body;
+        const { title, description, imageUrl, additionalImages, videoUrl, type, date } = req.body;
         const item = await prisma.newsItem.create({
             data: {
                 title,
                 description: description || '',
                 imageUrl,
-                videoUrl,
+                additionalImages: additionalImages ? JSON.stringify(additionalImages) : null,
+                videoUrl: videoUrl || null,
                 type: type || 'IMAGE',
-                date: new Date().toISOString().split('T')[0],
+                date: date || new Date().toISOString().split('T')[0],
             },
         });
-        res.status(201).json(item);
+        // Parse additionalImages back to array for response
+        res.status(201).json(parseNewsImages(item));
     }
     catch (err) {
         console.error(err);

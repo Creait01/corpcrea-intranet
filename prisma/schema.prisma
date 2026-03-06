@@ -60,14 +60,15 @@ model User {
 // ============================
 
 model NewsItem {
-  id          String  @id @default(cuid())
-  title       String
-  description String
-  imageUrl    String? @map("image_url")
-  videoUrl    String? @map("video_url")
-  type        String  @default("IMAGE") // IMAGE | VIDEO
-  date        String
-  createdAt   DateTime @default(now()) @map("created_at")
+  id               String  @id @default(cuid())
+  title            String
+  description      String
+  imageUrl         String? @map("image_url")
+  additionalImages String? @map("additional_images") // JSON array of URLs
+  videoUrl         String? @map("video_url")
+  type             String  @default("IMAGE") // IMAGE | VIDEO
+  date             String
+  createdAt        DateTime @default(now()) @map("created_at")
 
   @@map("news")
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AppState } from '../types';
-import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown } from 'lucide-react';
+import { AppState, NewsItem } from '../types';
+import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 interface LandingProps {
   data: AppState;
@@ -11,6 +11,8 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   // Handle Scroll for Navbar styling
   useEffect(() => {
@@ -128,7 +130,10 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                   <p className="text-lg md:text-xl text-[#A2B2C8] mb-8 max-w-2xl leading-relaxed">
                     {item.description}
                   </p>
-                  <button className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide">
+                  <button 
+                    onClick={() => { setSelectedNews(item); setGalleryIndex(0); }}
+                    className="group flex items-center gap-3 text-white border-2 border-[#CBA052]/50 px-8 py-4 rounded-xl hover:bg-[#CBA052] hover:border-[#CBA052] transition-all font-bold tracking-wide"
+                  >
                     Leer más <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
@@ -475,6 +480,62 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           </div>
         </div>
       </footer>
+
+      {/* News Detail Modal */}
+      {selectedNews && (() => {
+        const allImages = [selectedNews.imageUrl, ...(selectedNews.additionalImages || [])].filter(Boolean) as string[];
+        return (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedNews(null)}>
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+            <div className="relative bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+              <button onClick={() => setSelectedNews(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-800 rounded-full w-10 h-10 flex items-center justify-center shadow-lg text-xl font-bold">×</button>
+              
+              {/* Image Gallery */}
+              {allImages.length > 0 && (
+                <div className="relative">
+                  <img src={allImages[galleryIndex]} alt={selectedNews.title} className="w-full aspect-[16/9] object-contain bg-slate-900 rounded-t-3xl" />
+                  {allImages.length > 1 && (
+                    <>
+                      <button onClick={() => setGalleryIndex(prev => (prev - 1 + allImages.length) % allImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center"><ChevronLeft size={24}/></button>
+                      <button onClick={() => setGalleryIndex(prev => (prev + 1) % allImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center"><ChevronRight size={24}/></button>
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                        {allImages.map((_, i) => (
+                          <button key={i} onClick={() => setGalleryIndex(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === galleryIndex ? 'bg-[#CBA052] scale-125' : 'bg-white/50 hover:bg-white/80'}`} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Thumbnail Strip */}
+              {allImages.length > 1 && (
+                <div className="flex gap-2 p-4 bg-slate-50 overflow-x-auto">
+                  {allImages.map((img, i) => (
+                    <button key={i} onClick={() => setGalleryIndex(i)} className={`flex-shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${i === galleryIndex ? 'border-[#CBA052] ring-2 ring-[#CBA052]/30' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="px-3 py-1 bg-[#CBA052]/10 text-[#CBA052] text-xs font-black rounded-full">{selectedNews.date}</span>
+                  {selectedNews.videoUrl && (
+                    <a href={selectedNews.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full hover:bg-red-100 transition-colors">
+                      <Play size={12}/> Ver Video
+                    </a>
+                  )}
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-[#25282A] mb-4 leading-tight">{selectedNews.title}</h2>
+                <p className="text-slate-600 leading-relaxed whitespace-pre-line">{selectedNews.description}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

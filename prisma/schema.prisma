@@ -28,6 +28,7 @@ model User {
   email            String   @unique
   password         String   // bcrypt hash
   role             UserRole @default(EMPLOYEE)
+  approved         Boolean  @default(false)
   avatar           String?
   position         String   @default("")
   department       String?

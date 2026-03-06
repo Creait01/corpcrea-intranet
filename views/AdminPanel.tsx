@@ -14,7 +14,7 @@ interface AdminPanelProps {
 // Legacy ImageUploadField removed — now using CloudinaryUpload component
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack }) => {
-  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'settings'>('news');
+  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'users' | 'settings'>('news');
   const user = data.currentUser;
   
   // Local state for forms
@@ -40,6 +40,85 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   // CEO Message Form
   const [ceoText, setCeoText] = useState(data.ceoMessage.text);
   const [ceoImage, setCeoImage] = useState(data.ceoMessage.imageUrl);
+
+  // Pending Users State
+  const [pendingUsers, setPendingUsers] = useState<any[]>([]);
+  const [pendingLoading, setPendingLoading] = useState(false);
+  const [approveForm, setApproveForm] = useState<Record<string, { role: string; department: string; position: string }>>({});
+
+  // Fetch CEO message from DB on mount
+  useEffect(() => {
+    fetch('/api/admin/ceo-message')
+      .then(r => r.ok ? r.json() : null)
+      .then(msg => {
+        if (msg) {
+          setCeoText(msg.text || '');
+          setCeoImage(msg.imageUrl || '');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Fetch pending users
+  const fetchPendingUsers = async () => {
+    setPendingLoading(true);
+    try {
+      const res = await fetch('/api/admin/pending-users', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) {
+        const users = await res.json();
+        setPendingUsers(users);
+        // Init form defaults
+        const defaults: Record<string, { role: string; department: string; position: string }> = {};
+        users.forEach((u: any) => {
+          defaults[u.id] = { role: u.role || 'EMPLOYEE', department: u.department || '', position: u.position || '' };
+        });
+        setApproveForm(defaults);
+      }
+    } catch (err) {
+      console.error('Error fetching pending users:', err);
+    } finally {
+      setPendingLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPendingUsers(); }, []);
+
+  const handleApproveUser = async (userId: string) => {
+    const form = approveForm[userId];
+    if (!form) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/approve`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setPendingUsers(prev => prev.filter(u => u.id !== userId));
+      }
+    } catch (err) {
+      console.error('Error approving user:', err);
+    }
+  };
+
+  const handleRejectUser = async (userId: string) => {
+    if (!confirm('¿Estás seguro de rechazar este usuario? Se eliminará su cuenta.')) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/reject`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) {
+        setPendingUsers(prev => prev.filter(u => u.id !== userId));
+      }
+    } catch (err) {
+      console.error('Error rejecting user:', err);
+    }
+  };
 
   // Odoo Settings State
   const odooConfig = odooApi.getConfig();
@@ -180,13 +259,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
     }
   };
 
-  const handleUpdateCeo = () => {
-    actions.updateCeoMessage({
-        text: ceoText,
-        imageUrl: ceoImage,
-        updatedAt: new Date().toLocaleDateString()
-    });
-    alert('Mensaje de dirección actualizado correctamente.');
+  const handleUpdateCeo = async () => {
+    try {
+      const res = await fetch('/api/admin/ceo-message', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({ text: ceoText, imageUrl: ceoImage }),
+      });
+      if (res.ok) {
+        const msg = await res.json();
+        actions.updateCeoMessage({
+          text: msg.text,
+          imageUrl: msg.imageUrl,
+          updatedAt: msg.updatedAt,
+        });
+        alert('Mensaje de dirección actualizado correctamente.');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Error al actualizar el mensaje.');
+      }
+    } catch (err) {
+      console.error('Error updating CEO message:', err);
+      alert('Error de conexión al guardar el mensaje.');
+    }
   };
 
   const handleAddDocument = () => {
@@ -319,6 +417,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
             className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'companies' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
           >
              <Building2 size={18}/> Empresas del Grupo
+          </button>
+          <button 
+            onClick={() => { setActiveSection('users'); fetchPendingUsers(); }}
+            className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'users' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+          >
+             <Shield size={18}/> Usuarios
+             {pendingUsers.length > 0 && (
+               <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{pendingUsers.length}</span>
+             )}
           </button>
           {user?.role === UserRole.CEO && (
              <button 
@@ -778,6 +885,96 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                 </div>
               </div>
             </>
+          )}
+
+          {activeSection === 'users' && (
+            <div className="space-y-6">
+              {/* Pending Users */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <Shield className="text-orange-500" size={22}/> Usuarios Pendientes de Aprobación
+                  </h2>
+                  <button onClick={fetchPendingUsers} className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+                    {pendingLoading ? <Loader2 size={14} className="animate-spin"/> : null} Actualizar
+                  </button>
+                </div>
+
+                {pendingUsers.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400">
+                    <CheckCircle size={48} className="mx-auto mb-3 text-green-300"/>
+                    <p className="font-medium">No hay usuarios pendientes</p>
+                    <p className="text-sm">Todos los registros han sido procesados.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingUsers.map(u => (
+                      <div key={u.id} className="border border-slate-200 rounded-xl p-5 bg-slate-50/50">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                            {u.name?.charAt(0) || '?'}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-slate-800 text-lg">{u.name}</h3>
+                            <p className="text-slate-500 text-sm">{u.email}</p>
+                            {u.identificationId && <p className="text-slate-400 text-xs mt-0.5">Cédula: {u.identificationId}</p>}
+                          </div>
+                          <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">PENDIENTE</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Rol</label>
+                            <select
+                              value={approveForm[u.id]?.role || 'EMPLOYEE'}
+                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { ...prev[u.id], role: e.target.value } }))}
+                              className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                              <option value="EMPLOYEE">Empleado</option>
+                              <option value="MANAGER">Gerente</option>
+                              <option value="CEO">CEO</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Departamento</label>
+                            <input
+                              value={approveForm[u.id]?.department || ''}
+                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { ...prev[u.id], department: e.target.value } }))}
+                              placeholder="Ej: Tecnología"
+                              className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Cargo</label>
+                            <input
+                              value={approveForm[u.id]?.position || ''}
+                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { ...prev[u.id], position: e.target.value } }))}
+                              placeholder="Ej: Analista"
+                              className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3 justify-end">
+                          <button
+                            onClick={() => handleRejectUser(u.id)}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-medium text-sm transition-colors border border-red-200"
+                          >
+                            <X size={16}/> Rechazar
+                          </button>
+                          <button
+                            onClick={() => handleApproveUser(u.id)}
+                            className="flex items-center gap-1.5 px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors shadow-lg shadow-green-600/20"
+                          >
+                            <CheckCircle size={16}/> Aprobar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {activeSection === 'settings' && (

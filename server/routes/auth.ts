@@ -26,6 +26,12 @@ router.post('/login', async (req, res) => {
       return;
     }
 
+    // Check if user is approved
+    if (!user.approved) {
+      res.status(403).json({ error: 'Tu cuenta está pendiente de aprobación por un administrador.' });
+      return;
+    }
+
     const token = generateToken(user.id, user.role);
     const { password: _, ...userWithoutPassword } = user;
     res.json({ token, user: userWithoutPassword });
@@ -58,14 +64,18 @@ router.post('/register', async (req, res) => {
         password: hashedPassword,
         identificationId: identificationId || null,
         role: 'EMPLOYEE',
+        approved: false,
         position: 'Sin asignar',
         department: 'Sin asignar',
       },
     });
 
-    const token = generateToken(user.id, user.role);
     const { password: _, ...userWithoutPassword } = user;
-    res.status(201).json({ token, user: userWithoutPassword });
+    res.status(201).json({
+      message: 'Registro exitoso. Tu cuenta está pendiente de aprobación por un administrador.',
+      user: userWithoutPassword,
+      pendingApproval: true,
+    });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Error interno' });

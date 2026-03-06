@@ -79,6 +79,16 @@ const App: React.FC = () => {
         }
       })
       .catch(() => {});
+
+    // Fetch CEO message from DB
+    fetch('/api/admin/ceo-message')
+      .then(r => r.ok ? r.json() : null)
+      .then(msg => {
+        if (msg) {
+          setData(prev => ({ ...prev, ceoMessage: { text: msg.text || '', imageUrl: msg.imageUrl || '', updatedAt: msg.updatedAt || '' } }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Actions
@@ -150,7 +160,15 @@ const App: React.FC = () => {
         if (user.identificationId) fetchOdooData(user.identificationId);
         return true;
       }
-    } catch (err) {
+      // Handle pending approval
+      if (res.status === 403) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'Cuenta pendiente de aprobación');
+      }
+    } catch (err: any) {
+      if (err.message && err.message.includes('pendiente')) {
+        throw err; // Re-throw approval errors to be handled by Login
+      }
       console.warn('API login unavailable, falling back to mock users');
     }
 
@@ -172,34 +190,50 @@ const App: React.FC = () => {
     });
   };
 
-  // Register new user (verified via Odoo)
+  // Register new user (real API with approval flow)
   const register = async (regData: { name: string; email: string; password: string; identificationId: string; odooEmployeeId: number; position: string; department: string }): Promise<boolean> => {
-    // Check if email already exists
-    const allUsers = [...MOCK_USERS, ...registeredUsers];
-    if (allUsers.find(u => u.email === regData.email)) {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: regData.name,
+          email: regData.email,
+          password: regData.password,
+          identificationId: regData.identificationId,
+        }),
+      });
+      if (res.ok) {
+        return true; // Registration successful, pending approval
+      }
+      if (res.status === 409) return false; // Email already exists
       return false;
+    } catch (err) {
+      console.warn('API register unavailable, falling back to local');
+      // Fallback: local registration
+      const allUsers = [...MOCK_USERS, ...registeredUsers];
+      if (allUsers.find(u => u.email === regData.email)) return false;
+
+      const newUser = {
+        id: `odoo-${regData.odooEmployeeId}`,
+        name: regData.name,
+        email: regData.email,
+        password: regData.password,
+        role: UserRole.EMPLOYEE,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(regData.name)}&background=1D3C34&color=fff`,
+        position: regData.position,
+        department: regData.department,
+        identificationId: regData.identificationId,
+        odooEmployeeId: regData.odooEmployeeId,
+        vacationDays: 0,
+        socialBenefits: 0,
+        loans: [],
+      };
+      const updated = [...registeredUsers, newUser];
+      setRegisteredUsers(updated);
+      localStorage.setItem('corpocrea_registered_users', JSON.stringify(updated));
+      return true;
     }
-
-    const newUser = {
-      id: `odoo-${regData.odooEmployeeId}`,
-      name: regData.name,
-      email: regData.email,
-      password: regData.password,
-      role: UserRole.EMPLOYEE,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(regData.name)}&background=1D3C34&color=fff`,
-      position: regData.position,
-      department: regData.department,
-      identificationId: regData.identificationId,
-      odooEmployeeId: regData.odooEmployeeId,
-      vacationDays: 0,
-      socialBenefits: 0,
-      loans: [],
-    };
-
-    const updated = [...registeredUsers, newUser];
-    setRegisteredUsers(updated);
-    localStorage.setItem('corpocrea_registered_users', JSON.stringify(updated));
-    return true;
   };
 
   const logout = () => {
@@ -451,7 +485,7 @@ const App: React.FC = () => {
         );
 
       case 'ADMIN':
-        if (!data.currentUser || data.currentUser.role !== UserRole.MANAGER) {
+        if (!data.currentUser || (data.currentUser.role !== UserRole.MANAGER && data.currentUser.role !== UserRole.CEO)) {
             setCurrentView('DASHBOARD');
             return null;
         }

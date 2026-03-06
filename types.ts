@@ -56,6 +56,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  approved?: boolean;
   avatar: string;
   position: string;
   department?: string;

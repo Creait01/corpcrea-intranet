@@ -91,17 +91,68 @@ router.post('/departments', authMiddleware, requireRole('CEO', 'MANAGER'), async
     }
 });
 // ================== USERS (admin) ==================
-// GET /api/admin/users
+// GET /api/admin/users (all approved users)
 router.get('/users', authMiddleware, requireRole('CEO', 'MANAGER'), async (_req, res) => {
     try {
         const users = await prisma.user.findMany({
+            where: { approved: true },
             select: {
                 id: true, name: true, email: true, role: true, position: true,
-                department: true, avatar: true, vacationDays: true, socialBenefits: true,
+                department: true, avatar: true, vacationDays: true, socialBenefits: true, approved: true,
             },
             orderBy: { name: 'asc' },
         });
         res.json(users);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// GET /api/admin/pending-users (users awaiting approval)
+router.get('/pending-users', authMiddleware, requireRole('CEO', 'MANAGER'), async (_req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            where: { approved: false },
+            select: {
+                id: true, name: true, email: true, role: true, position: true,
+                department: true, avatar: true, approved: true, identificationId: true,
+            },
+            orderBy: { name: 'asc' },
+        });
+        res.json(users);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// PUT /api/admin/users/:id/approve
+router.put('/users/:id/approve', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+    try {
+        const { role, department, position } = req.body;
+        const user = await prisma.user.update({
+            where: { id: String(req.params.id) },
+            data: {
+                approved: true,
+                role: role || 'EMPLOYEE',
+                department: department || undefined,
+                position: position || undefined,
+            },
+            select: { id: true, name: true, email: true, role: true, position: true, department: true, approved: true },
+        });
+        res.json(user);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// DELETE /api/admin/users/:id/reject (reject/delete pending user)
+router.delete('/users/:id/reject', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+    try {
+        await prisma.user.delete({ where: { id: String(req.params.id) } });
+        res.json({ success: true });
     }
     catch (err) {
         console.error(err);
@@ -115,7 +166,7 @@ router.put('/users/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (r
         const user = await prisma.user.update({
             where: { id: String(req.params.id) },
             data: { role, position, department, vacationDays, socialBenefits },
-            select: { id: true, name: true, email: true, role: true, position: true, department: true },
+            select: { id: true, name: true, email: true, role: true, position: true, department: true, approved: true },
         });
         res.json(user);
     }

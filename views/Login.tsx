@@ -36,9 +36,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
     setLoading(true);
     setError('');
     
-    const success = await onLogin(email, password);
-    if (!success) {
-      setError('Credenciales incorrectas. Intenta nuevamente.');
+    try {
+      const success = await onLogin(email, password);
+      if (!success) {
+        setError('Credenciales incorrectas. Intenta nuevamente.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión.');
+    } finally {
       setLoading(false);
     }
   };
@@ -99,12 +104,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
 
       if (success) {
         setRegSuccess(true);
-        setTimeout(() => {
-          setActiveTab('login');
-          setEmail(regEmail.trim());
-          setRegSuccess(false);
-          resetRegister();
-        }, 2000);
       } else {
         setRegError('Este correo ya está registrado.');
       }
@@ -256,8 +255,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
                     <div className="inline-flex p-4 rounded-full bg-green-500/20 mb-4">
                       <CheckCircle className="w-10 h-10 text-green-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-2">¡Cuenta Creada!</h3>
-                    <p className="text-white/60 text-sm">Redirigiendo al inicio de sesión...</p>
+                    <h3 className="text-xl font-bold text-white mb-2">¡Registro Exitoso!</h3>
+                    <p className="text-white/60 text-sm">Tu cuenta está pendiente de aprobación por un administrador.</p>
+                    <p className="text-white/40 text-xs mt-2">Recibirás acceso una vez que tu solicitud sea revisada.</p>
+                    <button
+                      onClick={() => { setActiveTab('login'); setRegSuccess(false); resetRegister(); }}
+                      className="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 text-white/80 rounded-xl font-medium text-sm transition-colors"
+                    >
+                      Ir a Iniciar Sesión
+                    </button>
                   </div>
                 )}
 

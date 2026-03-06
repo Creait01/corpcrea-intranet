@@ -283,7 +283,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack, siteL
                         <CreditCard className="w-7 h-7 text-blue-400" />
                       </div>
                       <h2 className="text-2xl font-bold text-white">Verificar Identidad</h2>
-                      <p className="text-white/40 mt-1 text-sm">Ingresa tu cédula para verificar que eres empleado de Corpocrea</p>
+                      <p className="text-white/40 mt-1 text-sm">Ingresa tu número de cédula para verificar que eres empleado de Corpocrea</p>
                     </div>
 
                     <div>
@@ -292,14 +292,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack, siteL
                         <CreditCard className="absolute left-3 top-3 text-white/30" size={18} />
                         <input 
                           type="text"
+                          inputMode="numeric"
                           value={cedula}
-                          onChange={(e) => setCedula(e.target.value)}
+                          onChange={(e) => setCedula(e.target.value.replace(/\D/g, ''))}
                           className="pl-10 w-full p-3 bg-white/10 border border-white/10 rounded-xl text-white placeholder-white/30 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                          placeholder="V12345678"
+                          placeholder="12345678"
                           onKeyDown={(e) => e.key === 'Enter' && handleVerifyCedula()}
                         />
                       </div>
-                      <p className="text-white/30 text-[11px] mt-2">Formato: V12345678 o E12345678</p>
+                      <p className="text-white/30 text-[11px] mt-2">Solo números, sin letra. Ejemplo: 12345678</p>
                     </div>
 
                     {regError && (

@@ -111,7 +111,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
         {data.news.map((item, index) => (
           <div 
             key={item.id}
-            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentNewsIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentNewsIndex ? 'opacity-100 scale-100 z-10 pointer-events-auto' : 'opacity-0 scale-105 z-0 pointer-events-none'}`}
           >
             {/* Video ALWAYS takes priority as cover */}
             {item.videoUrl ? (

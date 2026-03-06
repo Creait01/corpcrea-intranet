@@ -44,7 +44,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   // Pending Users State
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [pendingLoading, setPendingLoading] = useState(false);
-  const [approveForm, setApproveForm] = useState<Record<string, { role: string; department: string; position: string }>>({});
+  const [approveForm, setApproveForm] = useState<Record<string, { role: string }>>({});
 
   // Fetch CEO message from DB on mount
   useEffect(() => {
@@ -70,9 +70,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
         const users = await res.json();
         setPendingUsers(users);
         // Init form defaults
-        const defaults: Record<string, { role: string; department: string; position: string }> = {};
+        const defaults: Record<string, { role: string }> = {};
         users.forEach((u: any) => {
-          defaults[u.id] = { role: u.role || 'EMPLOYEE', department: u.department || '', position: u.position || '' };
+          defaults[u.id] = { role: u.role || 'EMPLOYEE' };
         });
         setApproveForm(defaults);
       }
@@ -943,34 +943,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                           <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Rol</label>
+                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Departamento (Odoo)</label>
+                            <p className="p-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700">{u.department || 'Sin asignar'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Cargo (Odoo)</label>
+                            <p className="p-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-700">{u.position || 'Sin asignar'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Asignar Rol</label>
                             <select
                               value={approveForm[u.id]?.role || 'EMPLOYEE'}
-                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { ...prev[u.id], role: e.target.value } }))}
+                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { role: e.target.value } }))}
                               className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                             >
                               <option value="EMPLOYEE">Empleado</option>
                               <option value="MANAGER">Gerente</option>
                               <option value="CEO">CEO</option>
                             </select>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Departamento</label>
-                            <input
-                              value={approveForm[u.id]?.department || ''}
-                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { ...prev[u.id], department: e.target.value } }))}
-                              placeholder="Ej: Tecnología"
-                              className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Cargo</label>
-                            <input
-                              value={approveForm[u.id]?.position || ''}
-                              onChange={e => setApproveForm(prev => ({ ...prev, [u.id]: { ...prev[u.id], position: e.target.value } }))}
-                              placeholder="Ej: Analista"
-                              className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
                           </div>
                         </div>
 

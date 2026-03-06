@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password, identificationId } = req.body;
+        const { name, email, password, identificationId, position, department } = req.body;
         if (!name || !email || !password) {
             res.status(400).json({ error: 'Nombre, email y contraseña requeridos' });
             return;
@@ -57,8 +57,8 @@ router.post('/register', async (req, res) => {
                 identificationId: identificationId || null,
                 role: 'EMPLOYEE',
                 approved: false,
-                position: 'Sin asignar',
-                department: 'Sin asignar',
+                position: position || 'Sin asignar',
+                department: department || 'Sin asignar',
             },
         });
         const { password: _, ...userWithoutPassword } = user;

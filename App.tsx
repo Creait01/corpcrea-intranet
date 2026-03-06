@@ -204,6 +204,8 @@ const App: React.FC = () => {
           email: regData.email,
           password: regData.password,
           identificationId: regData.identificationId,
+          position: regData.position,
+          department: regData.department,
         }),
       });
       if (res.ok) {

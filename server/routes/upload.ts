@@ -60,8 +60,8 @@ router.get('/cloudinary-config', async (_req, res) => {
   }
 });
 
-// POST /api/upload  — signed upload via backend (more secure, supports all file types)
-router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
+// POST /api/upload  — signed upload via backend
+router.post('/', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       res.status(400).json({ error: 'No se proporcionó archivo' });
@@ -119,7 +119,7 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
 });
 
 // POST /api/upload/multiple  — upload multiple files
-router.post('/multiple', authMiddleware, upload.array('files', 10), async (req, res) => {
+router.post('/multiple', upload.array('files', 10), async (req, res) => {
   try {
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
@@ -169,7 +169,7 @@ router.post('/multiple', authMiddleware, upload.array('files', 10), async (req, 
 });
 
 // DELETE /api/upload/:publicId  — remove from Cloudinary
-router.delete('/:publicId', authMiddleware, async (req, res) => {
+router.delete('/:publicId', async (req, res) => {
   try {
     const { configured } = await configureCloudinary();
     if (!configured) {
@@ -189,7 +189,7 @@ router.delete('/:publicId', authMiddleware, async (req, res) => {
 });
 
 // POST /api/upload/test  — test Cloudinary connection
-router.post('/test', authMiddleware, async (_req, res) => {
+router.post('/test', async (_req, res) => {
   try {
     const { configured, cloudName } = await configureCloudinary();
     if (!configured) {

@@ -255,296 +255,230 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
       </section>
 
       {/* --- SOCIAL / TEAM SECTION --- */}
-      <section id="team" className="relative py-28 overflow-hidden">
+      <section id="team" className="relative py-14 overflow-hidden">
         {/* Layered background */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50"></div>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#CBA052]/40 to-transparent"></div>
-        <div className="absolute top-20 -left-32 w-96 h-96 bg-[#CBA052]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 -right-32 w-96 h-96 bg-[#1D3C34]/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#A2B2C8]/5 rounded-full blur-3xl"></div>
-        {/* Subtle pattern overlay */}
+        <div className="absolute top-10 -left-32 w-72 h-72 bg-[#CBA052]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 -right-32 w-72 h-72 bg-[#1D3C34]/5 rounded-full blur-3xl"></div>
         <div className="absolute inset-0 opacity-[0.02]" style={{backgroundImage: 'radial-gradient(circle at 1px 1px, #25282A 1px, transparent 0)', backgroundSize: '40px 40px'}}></div>
 
         <div className="relative max-w-7xl mx-auto px-4">
-          {/* Section Header */}
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[#CBA052]/10 via-[#CBA052]/15 to-[#CBA052]/10 text-[#CBA052] text-xs font-black rounded-full mb-6 tracking-[0.25em] uppercase border border-[#CBA052]/20 backdrop-blur-sm">
+          {/* Compact Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-[#CBA052]/10 via-[#CBA052]/15 to-[#CBA052]/10 text-[#CBA052] text-[10px] font-black rounded-full mb-3 tracking-[0.25em] uppercase border border-[#CBA052]/20">
               <span className="w-1.5 h-1.5 rounded-full bg-[#CBA052] animate-pulse"></span>
               Nuestra Gente
               <span className="w-1.5 h-1.5 rounded-full bg-[#CBA052] animate-pulse"></span>
             </div>
-            <h2 className="text-4xl md:text-6xl font-black text-[#25282A] tracking-tight leading-none">
+            <h2 className="text-3xl md:text-4xl font-black text-[#25282A] tracking-tight leading-none">
               Equipo <span className="bg-gradient-to-r from-[#CBA052] to-[#a07d3a] bg-clip-text text-transparent">Corpocrea</span>
             </h2>
-            <div className="flex items-center justify-center gap-3 mt-6">
-              <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#CBA052]/40"></div>
-              <p className="text-slate-500 text-lg font-light">Celebramos a quienes hacen posible nuestra visión</p>
-              <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#CBA052]/40"></div>
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* === ROW 1: Employee of Month + Birthdays + Anniversaries === */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
             
-            {/* Employee of the Month */}
+            {/* Employee of the Month — spans 6 cols */}
             {employeeOfMonth && (
-              <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#1D3C34] via-[#1D3C34]/95 to-[#25282A] text-white p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 shadow-2xl shadow-[#1D3C34]/20 group hover:shadow-3xl hover:shadow-[#1D3C34]/30 transition-all duration-700">
-                {/* Decorative light effects */}
-                <div className="absolute top-0 right-0 w-80 h-80 bg-[#CBA052] blur-[150px] opacity-15 rounded-full group-hover:opacity-25 transition-opacity duration-700"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#A2B2C8] blur-[100px] opacity-10 rounded-full group-hover:opacity-20 transition-opacity duration-700"></div>
-                <div className="absolute top-4 right-4 text-[#CBA052]/10 text-8xl font-black leading-none select-none pointer-events-none">★</div>
-                
-                {/* Animated border glow */}
-                <div className="absolute inset-0 rounded-[2rem] border border-[#CBA052]/10 group-hover:border-[#CBA052]/25 transition-colors duration-700"></div>
+              <div className="lg:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1D3C34] via-[#1D3C34]/95 to-[#25282A] text-white p-5 flex items-center gap-5 shadow-xl shadow-[#1D3C34]/15 group hover:shadow-2xl transition-all duration-500">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#CBA052] blur-[120px] opacity-15 rounded-full group-hover:opacity-25 transition-opacity"></div>
+                <div className="absolute top-2 right-3 text-[#CBA052]/10 text-5xl font-black leading-none select-none pointer-events-none">★</div>
+                <div className="absolute inset-0 rounded-2xl border border-[#CBA052]/10 group-hover:border-[#CBA052]/25 transition-colors"></div>
 
-                <div className="relative w-36 h-36 md:w-44 md:h-44 flex-shrink-0">
-                  {/* Animated ring */}
-                  <div className="absolute inset-[-6px] border-2 border-[#CBA052]/40 rounded-full" style={{animation: 'spin 20s linear infinite'}}></div>
-                  <div className="absolute inset-[-12px] border border-[#CBA052]/15 rounded-full" style={{animation: 'spin 30s linear infinite reverse'}}></div>
-                  <div className="absolute inset-[-3px] bg-gradient-to-br from-[#CBA052]/30 to-transparent rounded-full blur-sm"></div>
-                  <img 
-                    src={employeeOfMonth.photo} 
-                    alt={employeeOfMonth.name} 
-                    className="w-full h-full object-cover rounded-full border-4 border-[#1D3C34] shadow-2xl shadow-black/30 group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] text-white p-3 rounded-2xl border-4 border-[#1D3C34] shadow-lg shadow-[#CBA052]/30 group-hover:scale-110 transition-transform duration-300">
-                    <Award size={20} />
+                <div className="relative w-20 h-20 flex-shrink-0">
+                  <div className="absolute inset-[-4px] border-2 border-[#CBA052]/40 rounded-full" style={{animation: 'spin 20s linear infinite'}}></div>
+                  <div className="absolute inset-[-2px] bg-gradient-to-br from-[#CBA052]/30 to-transparent rounded-full blur-sm"></div>
+                  <img src={employeeOfMonth.photo} alt={employeeOfMonth.name} className="w-full h-full object-cover rounded-full border-3 border-[#1D3C34] shadow-xl group-hover:scale-105 transition-transform duration-500"/>
+                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] text-white p-1.5 rounded-xl border-3 border-[#1D3C34] shadow-lg shadow-[#CBA052]/30">
+                    <Award size={14} />
                   </div>
                 </div>
 
-                <div className="relative text-center md:text-left flex-1">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#CBA052]/15 rounded-full mb-4 border border-[#CBA052]/20">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#CBA052] animate-pulse"></div>
-                    <span className="text-[#CBA052] font-black uppercase tracking-[0.2em] text-[10px]">Reconocimiento del Mes</span>
+                <div className="relative flex-1 min-w-0">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#CBA052]/15 rounded-full mb-2 border border-[#CBA052]/20">
+                    <div className="w-1 h-1 rounded-full bg-[#CBA052] animate-pulse"></div>
+                    <span className="text-[#CBA052] font-black uppercase tracking-[0.15em] text-[8px]">Empleado del Mes</span>
                   </div>
-                  <h3 className="text-2xl md:text-3xl font-black mb-2 tracking-tight leading-tight">Empleado del Mes</h3>
-                  <p className="text-xl md:text-2xl font-light text-white/90 mb-1">{employeeOfMonth.name}</p>
-                  <p className="text-[#A2B2C8]/80 text-sm font-medium">{employeeOfMonth.position} · {employeeOfMonth.department}</p>
-                  <div className="mt-5 flex flex-wrap gap-2 justify-center md:justify-start">
-                    {employeeOfMonth.skills.map(skill => (
-                      <span key={skill} className="px-3 py-1.5 bg-white/8 backdrop-blur-sm rounded-full text-xs text-white/70 font-medium border border-white/10 hover:bg-white/15 hover:text-white transition-all cursor-default">{skill}</span>
+                  <p className="text-lg font-black text-white leading-tight truncate">{employeeOfMonth.name}</p>
+                  <p className="text-[#A2B2C8]/80 text-xs font-medium truncate">{employeeOfMonth.position} · {employeeOfMonth.department}</p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {employeeOfMonth.skills.slice(0, 3).map(skill => (
+                      <span key={skill} className="px-2 py-0.5 bg-white/8 rounded-full text-[10px] text-white/60 font-medium border border-white/10">{skill}</span>
                     ))}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Celebrations */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              
-              {/* Birthdays */}
-              <div className="relative overflow-hidden rounded-[1.5rem] bg-white p-6 border border-pink-100/80 shadow-lg shadow-pink-500/5 hover:shadow-xl hover:shadow-pink-500/10 transition-all duration-500 group">
-                {/* Decorative corner */}
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-pink-200 to-rose-300 rounded-full opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                <div className="absolute top-3 right-3 text-2xl select-none opacity-60 group-hover:opacity-100 transition-opacity group-hover:scale-110 transform duration-300">🎂</div>
-                
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="p-2.5 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl text-white shadow-lg shadow-pink-500/25">
-                    <Gift size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-[#25282A] text-base leading-tight">Cumpleaños</h3>
-                    <p className="text-slate-400 text-xs font-medium">Este mes</p>
-                  </div>
+            {/* Birthdays — spans 3 cols */}
+            <div className={`${employeeOfMonth ? 'lg:col-span-3' : 'lg:col-span-6'} relative overflow-hidden rounded-2xl bg-white p-4 border border-pink-100/80 shadow-md hover:shadow-lg transition-all duration-300 group`}>
+              <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-pink-200 to-rose-300 rounded-full opacity-20"></div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg text-white shadow-sm shadow-pink-500/20">
+                  <Gift size={14} />
                 </div>
-                <div className="space-y-2.5 relative">
-                  {birthdays.length > 0 ? birthdays.map(emp => (
-                    <div key={emp.id} className="flex items-center gap-3 bg-gradient-to-r from-pink-50/80 to-rose-50/50 p-3 rounded-xl border border-pink-100/50 hover:border-pink-200 hover:shadow-md transition-all duration-300 group/item">
-                      <div className="relative">
-                        <img src={emp.photo} className="w-10 h-10 rounded-full object-cover ring-2 ring-pink-300 ring-offset-2 ring-offset-white" alt={emp.name} />
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-pink-500 rounded-full flex items-center justify-center">
-                          <span className="text-[8px]">🎉</span>
-                        </div>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-sm text-[#25282A] truncate">{emp.name}</p>
-                        <p className="text-xs text-pink-500 font-semibold">{emp.birthDate}</p>
-                      </div>
-                    </div>
-                  )) : (
-                    <div className="text-center py-4">
-                      <div className="text-3xl mb-2 opacity-40">🎈</div>
-                      <p className="text-sm text-slate-400 italic">No hay cumpleaños este mes</p>
-                    </div>
-                  )}
-                </div>
+                <h3 className="font-black text-[#25282A] text-sm">Cumpleaños</h3>
+                <span className="text-[10px] text-pink-400 font-medium ml-auto">Este mes</span>
               </div>
-
-              {/* Anniversaries */}
-              <div className="relative overflow-hidden rounded-[1.5rem] bg-white p-6 border border-[#A2B2C8]/30 shadow-lg shadow-[#1D3C34]/5 hover:shadow-xl hover:shadow-[#1D3C34]/10 transition-all duration-500 group">
-                {/* Decorative corner */}
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-gradient-to-br from-[#A2B2C8] to-[#1D3C34] rounded-full opacity-15 group-hover:opacity-25 transition-opacity"></div>
-                <div className="absolute top-3 right-3 text-2xl select-none opacity-60 group-hover:opacity-100 transition-opacity group-hover:scale-110 transform duration-300">🏆</div>
-
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="p-2.5 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-xl text-white shadow-lg shadow-[#1D3C34]/25">
-                    <Award size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-[#25282A] text-base leading-tight">Aniversarios</h3>
-                    <p className="text-slate-400 text-xs font-medium">Este mes</p>
-                  </div>
-                </div>
-                <div className="space-y-2.5 relative">
-                  {anniversaries.length > 0 ? anniversaries.map(emp => {
-                    const years = new Date().getFullYear() - new Date(emp.startDate).getFullYear();
-                    return (
-                    <div key={emp.id} className="flex items-center gap-3 bg-gradient-to-r from-[#1D3C34]/5 to-[#A2B2C8]/10 p-3 rounded-xl border border-[#A2B2C8]/20 hover:border-[#A2B2C8]/40 hover:shadow-md transition-all duration-300">
-                      <div className="relative">
-                        <img src={emp.photo} className="w-10 h-10 rounded-full object-cover ring-2 ring-[#A2B2C8] ring-offset-2 ring-offset-white" alt={emp.name} />
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[#1D3C34] rounded-full flex items-center justify-center">
-                          <span className="text-white text-[7px] font-black">{years}</span>
-                        </div>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-bold text-sm text-[#25282A] truncate">{emp.name}</p>
-                        <p className="text-xs text-[#1D3C34] font-semibold">{years} {years === 1 ? 'año' : 'años'} en la empresa</p>
-                      </div>
+              <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1" style={{scrollbarWidth: 'thin'}}>
+                {birthdays.length > 0 ? birthdays.map(emp => (
+                  <div key={emp.id} className="flex items-center gap-2 bg-pink-50/60 p-2 rounded-lg border border-pink-100/40 hover:border-pink-200 transition-all">
+                    <div className="relative flex-shrink-0">
+                      <img src={emp.photo} className="w-8 h-8 rounded-full object-cover ring-1 ring-pink-300" alt={emp.name} />
                     </div>
-                    );
-                  }) : (
-                    <div className="text-center py-4">
-                      <div className="text-3xl mb-2 opacity-40">📅</div>
-                      <p className="text-sm text-slate-400 italic">No hay aniversarios este mes</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-xs text-[#25282A] truncate">{emp.name}</p>
+                      <p className="text-[10px] text-pink-500 font-semibold">{emp.birthDate}</p>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )) : (
+                  <div className="text-center py-3">
+                    <span className="text-2xl opacity-30">🎈</span>
+                    <p className="text-xs text-slate-400 italic mt-1">Sin cumpleaños</p>
+                  </div>
+                )}
               </div>
+            </div>
 
+            {/* Anniversaries — spans 3 cols */}
+            <div className={`${employeeOfMonth ? 'lg:col-span-3' : 'lg:col-span-6'} relative overflow-hidden rounded-2xl bg-white p-4 border border-[#A2B2C8]/30 shadow-md hover:shadow-lg transition-all duration-300 group`}>
+              <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-[#A2B2C8] to-[#1D3C34] rounded-full opacity-15"></div>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-lg text-white shadow-sm shadow-[#1D3C34]/20">
+                  <Award size={14} />
+                </div>
+                <h3 className="font-black text-[#25282A] text-sm">Aniversarios</h3>
+                <span className="text-[10px] text-[#1D3C34]/50 font-medium ml-auto">Este mes</span>
+              </div>
+              <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1" style={{scrollbarWidth: 'thin'}}>
+                {anniversaries.length > 0 ? anniversaries.map(emp => {
+                  const years = new Date().getFullYear() - new Date(emp.startDate).getFullYear();
+                  return (
+                  <div key={emp.id} className="flex items-center gap-2 bg-[#1D3C34]/5 p-2 rounded-lg border border-[#A2B2C8]/15 hover:border-[#A2B2C8]/35 transition-all">
+                    <div className="relative flex-shrink-0">
+                      <img src={emp.photo} className="w-8 h-8 rounded-full object-cover ring-1 ring-[#A2B2C8]" alt={emp.name} />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#1D3C34] rounded-full flex items-center justify-center">
+                        <span className="text-white text-[6px] font-black">{years}</span>
+                      </div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-xs text-[#25282A] truncate">{emp.name}</p>
+                      <p className="text-[10px] text-[#1D3C34] font-semibold">{years} {years === 1 ? 'año' : 'años'}</p>
+                    </div>
+                  </div>
+                  );
+                }) : (
+                  <div className="text-center py-3">
+                    <span className="text-2xl opacity-30">📅</span>
+                    <p className="text-xs text-slate-400 italic mt-1">Sin aniversarios</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Recent Promotions (visible 15 days) */}
+          {/* === ROW 2: Promotions + New Hires side by side as compact list cards === */}
           {(() => {
             const now = Date.now();
             const recentPromos = (data.promotions || []).filter(p => {
               const d = new Date(p.date).getTime();
               return !isNaN(d) && (now - d) <= 15 * 24 * 60 * 60 * 1000;
             });
-            return recentPromos.length > 0 ? (
-            <div className="mt-20">
-              <div className="flex items-center justify-center gap-4 mb-10">
-                <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-[#CBA052]/30"></div>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-xl text-white shadow-lg shadow-[#CBA052]/25">
-                    <ArrowRight size={18} className="rotate-[-90deg]" />
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-black text-[#25282A]">Ascensos Recientes</h3>
-                </div>
-                <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-[#CBA052]/30"></div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recentPromos.slice(0, 6).map((p, idx) => (
-                  <div key={p.id} className="relative bg-white rounded-[1.5rem] p-6 shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-[#CBA052]/10 transition-all duration-500 group hover:-translate-y-2" style={{animationDelay: `${idx * 100}ms`}}>
-                    {/* Gold accent line */}
-                    <div className="absolute top-0 left-8 right-8 h-1 bg-gradient-to-r from-transparent via-[#CBA052] to-transparent rounded-b-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
-                    
-                    <div className="flex items-center gap-4 mb-5 mt-1">
-                      <div className="relative">
-                        {p.photoUrl ? (
-                          <img src={p.photoUrl} alt={p.employeeName} className="w-16 h-16 rounded-2xl object-cover ring-2 ring-[#CBA052]/20 group-hover:ring-[#CBA052]/60 transition-all shadow-md"/>
-                        ) : (
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#CBA052] to-[#a07d3a] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#CBA052]/30">
-                            {p.employeeName.charAt(0)}
-                          </div>
-                        )}
-                        <div className="absolute -top-1 -right-1 bg-[#CBA052] text-white p-1 rounded-lg shadow-md">
-                          <ArrowRight size={10} className="rotate-[-90deg]" />
-                        </div>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-black text-[#25282A] text-lg leading-tight truncate">{p.employeeName}</h4>
-                        <p className="text-xs text-[#CBA052] font-semibold mt-0.5">{p.department}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Position transition */}
-                    <div className="relative pl-4 border-l-2 border-dashed border-[#CBA052]/30 space-y-3">
-                      <div className="relative bg-slate-50 rounded-xl p-3">
-                        <div className="absolute -left-[1.35rem] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-slate-300 border-2 border-white"></div>
-                        <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Cargo anterior</p>
-                        <p className="text-sm font-medium text-slate-600">{p.previousPosition || '—'}</p>
-                      </div>
-                      <div className="relative bg-gradient-to-r from-[#CBA052]/10 to-[#CBA052]/5 rounded-xl p-3 border border-[#CBA052]/15">
-                        <div className="absolute -left-[1.35rem] top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#CBA052] border-2 border-white shadow-sm shadow-[#CBA052]/30"></div>
-                        <p className="text-[10px] uppercase tracking-wider text-[#CBA052] font-bold mb-0.5">Nuevo cargo</p>
-                        <p className="text-sm font-bold text-[#1D3C34]">{p.newPosition}</p>
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-4 text-right font-medium">{p.date}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null;
-          })()}
-
-          {/* New Hires (visible 30 days) */}
-          {(() => {
-            const now = Date.now();
             const recentHires = (data.newHires || []).filter(nh => {
               const d = new Date(nh.date).getTime();
               return !isNaN(d) && (now - d) <= 30 * 24 * 60 * 60 * 1000;
             });
-            return recentHires.length > 0 ? (
-            <div className="mt-20">
-              <div className="flex items-center justify-center gap-4 mb-10">
-                <div className="h-px flex-1 max-w-[80px] bg-gradient-to-r from-transparent to-[#1D3C34]/20"></div>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-xl text-white shadow-lg shadow-[#1D3C34]/25">
-                    <Users size={18} />
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-black text-[#25282A]">Nuevos Ingresos</h3>
-                </div>
-                <div className="h-px flex-1 max-w-[80px] bg-gradient-to-l from-transparent to-[#1D3C34]/20"></div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recentHires.slice(0, 6).map((nh, idx) => (
-                  <div key={nh.id} className="relative bg-white rounded-[1.5rem] p-6 shadow-lg shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-[#1D3C34]/10 transition-all duration-500 group hover:-translate-y-2" style={{animationDelay: `${idx * 100}ms`}}>
-                    {/* Green accent line */}
-                    <div className="absolute top-0 left-8 right-8 h-1 bg-gradient-to-r from-transparent via-[#1D3C34] to-transparent rounded-b-full opacity-40 group-hover:opacity-80 transition-opacity"></div>
-                    
-                    {/* Welcome badge */}
-                    <div className="absolute top-4 right-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#1D3C34]/10 text-[#1D3C34] text-[10px] font-black uppercase tracking-wider rounded-full border border-[#1D3C34]/15">
-                        <span className="text-xs">👋</span> Bienvenido
-                      </span>
+            const hasPromos = recentPromos.length > 0;
+            const hasHires = recentHires.length > 0;
+            if (!hasPromos && !hasHires) return null;
+            return (
+            <div className={`grid grid-cols-1 ${hasPromos && hasHires ? 'lg:grid-cols-2' : ''} gap-4`}>
+              
+              {/* Promotions Card */}
+              {hasPromos && (
+                <div className="relative overflow-hidden rounded-2xl bg-white border border-[#CBA052]/15 shadow-md hover:shadow-lg transition-all">
+                  {/* Header bar */}
+                  <div className="flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-[#CBA052]/5 via-transparent to-transparent border-b border-[#CBA052]/10">
+                    <div className="p-1.5 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-lg text-white shadow-sm shadow-[#CBA052]/25">
+                      <ArrowRight size={14} className="rotate-[-90deg]" />
                     </div>
-
-                    <div className="flex items-center gap-4 mb-5 mt-1">
-                      <div className="relative">
-                        {nh.photoUrl ? (
-                          <img src={nh.photoUrl} alt={nh.employeeName} className="w-16 h-16 rounded-2xl object-cover ring-2 ring-[#1D3C34]/20 group-hover:ring-[#1D3C34]/60 transition-all shadow-md"/>
-                        ) : (
-                          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#1D3C34]/30">
-                            {nh.employeeName.charAt(0)}
+                    <h3 className="font-black text-[#25282A] text-sm">Ascensos Recientes</h3>
+                    <span className="ml-auto px-2 py-0.5 bg-[#CBA052]/10 text-[#CBA052] text-[10px] font-black rounded-full">{recentPromos.length}</span>
+                  </div>
+                  {/* List */}
+                  <div className="divide-y divide-slate-100 max-h-[220px] overflow-y-auto" style={{scrollbarWidth: 'thin'}}>
+                    {recentPromos.slice(0, 6).map(p => (
+                      <div key={p.id} className="flex items-center gap-3 px-5 py-3 hover:bg-[#CBA052]/3 transition-colors group">
+                        <div className="relative flex-shrink-0">
+                          {p.photoUrl ? (
+                            <img src={p.photoUrl} alt={p.employeeName} className="w-10 h-10 rounded-xl object-cover ring-1 ring-[#CBA052]/20 group-hover:ring-[#CBA052]/50 transition-all"/>
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#CBA052] to-[#a07d3a] flex items-center justify-center text-white font-black text-sm shadow-sm">
+                              {p.employeeName.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-sm text-[#25282A] truncate">{p.employeeName}</p>
+                            <span className="text-[10px] text-slate-400 flex-shrink-0">{p.date}</span>
                           </div>
-                        )}
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[11px] text-slate-400 truncate max-w-[100px]">{p.previousPosition || '—'}</span>
+                            <ArrowRight size={10} className="text-[#CBA052] flex-shrink-0" />
+                            <span className="text-[11px] font-bold text-[#1D3C34] truncate max-w-[100px]">{p.newPosition}</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-[#CBA052] font-semibold flex-shrink-0">{p.department}</span>
                       </div>
-                      <div className="min-w-0 flex-1 pr-16">
-                        <h4 className="font-black text-[#25282A] text-lg leading-tight truncate">{nh.employeeName}</h4>
-                        <p className="text-xs text-[#1D3C34] font-semibold mt-0.5">{nh.department}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-[#1D3C34]/5 to-[#A2B2C8]/10 rounded-xl p-4 border border-[#1D3C34]/8">
-                      <p className="text-[10px] uppercase tracking-wider text-[#1D3C34]/60 font-bold mb-1">Cargo</p>
-                      <p className="text-sm font-bold text-[#1D3C34]">{nh.position || 'Sin asignar'}</p>
-                    </div>
-                    
-                    {nh.description && (
-                      <p className="text-sm text-slate-500 mt-3 leading-relaxed line-clamp-2">{nh.description}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <Calendar size={12} />
-                        <p className="text-[11px] font-medium">{nh.date}</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+
+              {/* New Hires Card */}
+              {hasHires && (
+                <div className="relative overflow-hidden rounded-2xl bg-white border border-[#1D3C34]/10 shadow-md hover:shadow-lg transition-all">
+                  {/* Header bar */}
+                  <div className="flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-[#1D3C34]/5 via-transparent to-transparent border-b border-[#1D3C34]/8">
+                    <div className="p-1.5 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-lg text-white shadow-sm shadow-[#1D3C34]/25">
+                      <Users size={14} />
+                    </div>
+                    <h3 className="font-black text-[#25282A] text-sm">Nuevos Ingresos</h3>
+                    <span className="ml-auto px-2 py-0.5 bg-[#1D3C34]/10 text-[#1D3C34] text-[10px] font-black rounded-full">{recentHires.length}</span>
+                  </div>
+                  {/* List */}
+                  <div className="divide-y divide-slate-100 max-h-[220px] overflow-y-auto" style={{scrollbarWidth: 'thin'}}>
+                    {recentHires.slice(0, 6).map(nh => (
+                      <div key={nh.id} className="flex items-center gap-3 px-5 py-3 hover:bg-[#1D3C34]/3 transition-colors group">
+                        <div className="relative flex-shrink-0">
+                          {nh.photoUrl ? (
+                            <img src={nh.photoUrl} alt={nh.employeeName} className="w-10 h-10 rounded-xl object-cover ring-1 ring-[#1D3C34]/20 group-hover:ring-[#1D3C34]/50 transition-all"/>
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-black text-sm shadow-sm">
+                              {nh.employeeName.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-sm text-[#25282A] truncate">{nh.employeeName}</p>
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-[#1D3C34]/8 text-[#1D3C34] text-[8px] font-black uppercase tracking-wider rounded-full flex-shrink-0">👋 Nuevo</span>
+                          </div>
+                          <p className="text-[11px] font-semibold text-[#1D3C34] truncate mt-0.5">{nh.position || 'Sin asignar'}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-[10px] text-[#1D3C34]/60 font-semibold">{nh.department}</span>
+                          <p className="text-[10px] text-slate-400">{nh.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          ) : null;
+            );
           })()}
         </div>
       </section>

@@ -25,4 +25,4 @@ RUN npx tsc -p server/tsconfig.json
 EXPOSE 3000
 
 # Start: push DB schema then run server
-CMD npx prisma db push --skip-generate && node server-dist/server/index.js
+CMD npx prisma db push && node server-dist/server/index.js

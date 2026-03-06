@@ -727,6 +727,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         return (
           <div className="space-y-6">
             {/* CEO Message - Dynamic */}
+            {data.ceoMessage.text ? (
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-6">
               <div className="w-full md:w-1/3 bg-slate-900 rounded-xl h-48 flex items-center justify-center relative overflow-hidden group cursor-pointer">
                 {data.ceoMessage.imageUrl ? (
@@ -758,10 +759,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </button>
               )}
             </div>
+            ) : null}
 
             {/* Internal News */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Bell className="text-blue-500" size={20}/> Noticias Internas</h3>
+              {data.news.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.news.map(n => (
                   <div key={n.id} className="group cursor-pointer">
@@ -773,6 +776,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                 ))}
               </div>
+              ) : (
+                <div className="text-center py-10">
+                  <Bell size={40} className="mx-auto mb-3 text-slate-200"/>
+                  <p className="text-slate-400 italic">No hay noticias para hoy.</p>
+                </div>
+              )}
             </div>
 
             {/* Promotions & New Hires Row */}

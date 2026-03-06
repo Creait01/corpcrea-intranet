@@ -166,6 +166,17 @@ router.delete('/users/:id/reject', authMiddleware, requireRole('CEO', 'MANAGER')
   }
 });
 
+// DELETE /api/admin/users/:id (delete approved user)
+router.delete('/users/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+  try {
+    await prisma.user.delete({ where: { id: String(req.params.id) } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error interno' });
+  }
+});
+
 // PUT /api/admin/users/:id
 router.put('/users/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
   try {

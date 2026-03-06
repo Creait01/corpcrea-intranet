@@ -1467,6 +1467,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                             >
                               <KeyRound size={16}/>
                             </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm(`¿Estás seguro de eliminar al usuario ${u.name}? Esta acción no se puede deshacer.`)) return;
+                                try {
+                                  const res = await fetch(`/api/admin/users/${u.id}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+                                  });
+                                  if (res.ok) setApprovedUsers(prev => prev.filter(x => x.id !== u.id));
+                                } catch (err) { console.error('Error deleting user:', err); }
+                              }}
+                              className="p-2 rounded-lg transition-colors text-sm text-slate-400 hover:text-red-600 hover:bg-red-50"
+                              title="Eliminar usuario"
+                            >
+                              <Trash2 size={16}/>
+                            </button>
                           </div>
                         </div>
 

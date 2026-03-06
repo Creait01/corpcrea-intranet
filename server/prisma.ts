@@ -4,14 +4,20 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefi
 
 let prismaInstance: PrismaClient | null = null;
 
-if (process.env.DATABASE_URL) {
+const dbUrl = process.env.DATABASE_URL;
+console.log(`🔗 DATABASE_URL ${dbUrl ? 'is set' : 'is NOT set'} (length: ${dbUrl?.length || 0})`);
+
+if (dbUrl) {
   try {
-    prismaInstance = globalForPrisma.prisma ?? new PrismaClient();
+    prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
+      log: ['warn', 'error'],
+    });
     if (process.env.NODE_ENV !== 'production') {
       globalForPrisma.prisma = prismaInstance;
     }
+    console.log('✅ Prisma client initialized successfully');
   } catch (e) {
-    console.warn('⚠️  Could not initialize Prisma client:', e);
+    console.error('❌ Could not initialize Prisma client:', e);
   }
 } else {
   console.warn('⚠️  DATABASE_URL not set — database features disabled');

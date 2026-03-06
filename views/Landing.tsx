@@ -331,12 +331,18 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
             </div>
           </div>
 
-          {/* Recent Promotions */}
-          {data.promotions && data.promotions.length > 0 && (
+          {/* Recent Promotions (visible 15 days) */}
+          {(() => {
+            const now = Date.now();
+            const recentPromos = (data.promotions || []).filter(p => {
+              const d = new Date(p.date).getTime();
+              return !isNaN(d) && (now - d) <= 15 * 24 * 60 * 60 * 1000;
+            });
+            return recentPromos.length > 0 ? (
             <div className="mt-12">
               <h3 className="text-2xl font-black text-[#25282A] text-center mb-8">Ascensos Recientes</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.promotions.slice(0, 6).map(p => (
+                {recentPromos.slice(0, 6).map(p => (
                   <div key={p.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
                     <div className="flex items-center gap-4 mb-4">
                       {p.photoUrl ? (
@@ -364,14 +370,21 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                 ))}
               </div>
             </div>
-          )}
+          ) : null;
+          })()}
 
-          {/* New Hires */}
-          {data.newHires && data.newHires.length > 0 && (
+          {/* New Hires (visible 30 days) */}
+          {(() => {
+            const now = Date.now();
+            const recentHires = (data.newHires || []).filter(nh => {
+              const d = new Date(nh.date).getTime();
+              return !isNaN(d) && (now - d) <= 30 * 24 * 60 * 60 * 1000;
+            });
+            return recentHires.length > 0 ? (
             <div className="mt-12">
               <h3 className="text-2xl font-black text-[#25282A] text-center mb-8">Nuevos Ingresos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {data.newHires.slice(0, 6).map(nh => (
+                {recentHires.slice(0, 6).map(nh => (
                   <div key={nh.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
                     <div className="flex items-center gap-4 mb-4">
                       {nh.photoUrl ? (
@@ -398,7 +411,8 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                 ))}
               </div>
             </div>
-          )}
+          ) : null;
+          })()}
         </div>
       </section>
 

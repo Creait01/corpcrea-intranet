@@ -777,12 +777,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
             {/* Promotions & New Hires Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Promotions */}
+              {/* Recent Promotions (visible 15 days) */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><TrendingUp className="text-[#CBA052]" size={20}/> Ascensos Recientes</h3>
-                {data.promotions && data.promotions.length > 0 ? (
+                {(() => {
+                  const now = Date.now();
+                  const recentPromos = (data.promotions || []).filter(p => {
+                    const d = new Date(p.date).getTime();
+                    return !isNaN(d) && (now - d) <= 15 * 24 * 60 * 60 * 1000;
+                  });
+                  return recentPromos.length > 0 ? (
                   <div className="space-y-3">
-                    {data.promotions.slice(0, 5).map(p => (
+                    {recentPromos.slice(0, 5).map(p => (
                       <div key={p.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-[#CBA052]/5 to-transparent rounded-xl border border-[#CBA052]/10">
                         {p.photoUrl ? (
                           <img src={p.photoUrl} alt={p.employeeName} className="w-10 h-10 rounded-full object-cover ring-2 ring-[#CBA052]/30"/>
@@ -801,15 +807,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                 ) : (
                   <p className="text-sm text-slate-400 italic text-center py-6">No hay ascensos registrados.</p>
-                )}
+                );
+                })()}
               </div>
 
               {/* New Hires */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><UserPlus2 className="text-green-500" size={20}/> Nuevos Ingresos</h3>
-                {data.newHires.length > 0 ? (
+                {(() => {
+                  const now = Date.now();
+                  const recentHires = (data.newHires || []).filter(nh => {
+                    const d = new Date(nh.date).getTime();
+                    return !isNaN(d) && (now - d) <= 30 * 24 * 60 * 60 * 1000;
+                  });
+                  return recentHires.length > 0 ? (
                   <div className="space-y-3">
-                    {data.newHires.slice(0, 5).map((nh) => (
+                    {recentHires.slice(0, 5).map((nh) => (
                       <div key={nh.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-transparent rounded-xl border border-green-100">
                         {nh.photoUrl ? (
                           <img src={nh.photoUrl} alt={nh.employeeName} className="w-10 h-10 rounded-full object-cover ring-2 ring-green-200"/>
@@ -828,7 +841,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                 ) : (
                   <p className="text-sm text-slate-400 italic text-center py-6">No hay ingresos recientes.</p>
-                )}
+                );
+                })()}
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, NewsItem } from '../types';
+import { AppState, NewsItem, EventItem } from '../types';
 import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 interface LandingProps {
@@ -13,6 +13,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   const [scrolled, setScrolled] = useState(false);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
 
   // Handle Scroll for Navbar styling
   useEffect(() => {
@@ -219,7 +220,7 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {data.events.map((event, idx) => (
-              <div key={event.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group hover:-translate-y-1 flex flex-col" style={{ animationDelay: `${idx * 100}ms` }}>
+              <div key={event.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group hover:-translate-y-1 flex flex-col cursor-pointer" onClick={() => setSelectedEvent(event)} style={{ animationDelay: `${idx * 100}ms` }}>
                 {event.imageUrl ? (
                   <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
                     <img src={event.imageUrl} alt={event.title} className="w-full h-full object-contain bg-white group-hover:scale-[1.02] transition-transform duration-500" />
@@ -536,6 +537,36 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           </div>
         );
       })()}
+
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedEvent(null)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+          <div className="relative bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-800 rounded-full w-10 h-10 flex items-center justify-center shadow-lg text-xl font-bold">×</button>
+
+            {selectedEvent.imageUrl && (
+              <img src={selectedEvent.imageUrl} alt={selectedEvent.title} className="w-full aspect-[16/9] object-contain bg-slate-900 rounded-t-3xl" />
+            )}
+
+            <div className="p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="px-3 py-1 bg-[#CBA052]/10 text-[#CBA052] text-xs font-black rounded-full">{selectedEvent.date}</span>
+                {selectedEvent.location && (
+                  <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">{selectedEvent.location}</span>
+                )}
+                {selectedEvent.videoUrl && (
+                  <a href={selectedEvent.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full hover:bg-red-100 transition-colors">
+                    <Play size={12}/> Ver Video
+                  </a>
+                )}
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-[#25282A] mb-4 leading-tight">{selectedEvent.title}</h2>
+              <p className="text-slate-600 leading-relaxed whitespace-pre-line">{selectedEvent.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, UserRole, ChatMessage, User, ChatChannel, Task, Project, TaskStatus, CalendarEvent, VacationRequest, Loan, SocialBenefitsRequest, OdooDashboardState, OdooLoanItem, NewsItem } from '../types';
+import { AppState, UserRole, ChatMessage, User, ChatChannel, Task, Project, TaskStatus, CalendarEvent, VacationRequest, Loan, SocialBenefitsRequest, OdooDashboardState, OdooLoanItem, NewsItem, EventItem } from '../types';
 import { MOCK_USERS } from '../data';
 import { 
   FileText, MessageSquare, Users, UserCheck, 
@@ -472,6 +472,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [newsGalleryIdx, setNewsGalleryIdx] = useState(0);
 
+  // Event detail
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+
   // Docs State
   const [selectedDocDept, setSelectedDocDept] = useState<string>('All');
   const [activeDocTab, setActiveDocTab] = useState<'documents' | 'templates'>('documents');
@@ -555,16 +558,47 @@ export const Dashboard: React.FC<DashboardProps> = ({
       }
   };
 
-  const handleAddEvent = () => {
+  const handleAddEvent = async () => {
     if (newEvent.title && newEvent.date) {
-      onAddCalendarEvent({
-        id: Date.now().toString(),
-        title: newEvent.title,
-        date: newEvent.date,
-        type: newEvent.type,
-        isWorkingDay: newEvent.isWorkingDay,
-        description: newEvent.description
-      });
+      try {
+        const res = await fetch('/api/calendar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify({
+            title: newEvent.title,
+            date: newEvent.date,
+            type: newEvent.type,
+            isWorkingDay: newEvent.isWorkingDay,
+            description: newEvent.description || '',
+          }),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          onAddCalendarEvent(created);
+        } else {
+          // Fallback to local-only
+          onAddCalendarEvent({
+            id: Date.now().toString(),
+            title: newEvent.title,
+            date: newEvent.date,
+            type: newEvent.type,
+            isWorkingDay: newEvent.isWorkingDay,
+            description: newEvent.description
+          });
+        }
+      } catch {
+        onAddCalendarEvent({
+          id: Date.now().toString(),
+          title: newEvent.title,
+          date: newEvent.date,
+          type: newEvent.type,
+          isWorkingDay: newEvent.isWorkingDay,
+          description: newEvent.description
+        });
+      }
       setShowEventModal(false);
       setNewEvent({ title: '', date: '', type: 'EVENT', isWorkingDay: true, description: '' });
     }
@@ -813,7 +847,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               {data.events && data.events.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {data.events.slice(0, 6).map(ev => (
-                    <div key={ev.id} className="group rounded-xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col">
+                    <div key={ev.id} className="group rounded-xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col cursor-pointer" onClick={() => setSelectedEvent(ev)}>
                       {ev.imageUrl ? (
                         <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-50">
                           <img src={ev.imageUrl} alt={ev.title} className="w-full h-full object-contain bg-white group-hover:scale-[1.02] transition-transform duration-300" />
@@ -1746,7 +1780,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
 
       </main>
-
       {/* News Detail Modal */}
       {selectedNews && (() => {
         const allImages = [selectedNews.imageUrl, ...(selectedNews.additionalImages || [])].filter(Boolean) as string[];
@@ -1799,6 +1832,36 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         );
       })()}
+
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setSelectedEvent(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+          <div className="relative bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white text-slate-800 rounded-full w-10 h-10 flex items-center justify-center shadow-lg text-xl font-bold">×</button>
+
+            {selectedEvent.imageUrl && (
+              <img src={selectedEvent.imageUrl} alt={selectedEvent.title} className="w-full aspect-[16/9] object-contain bg-slate-900 rounded-t-3xl" />
+            )}
+
+            <div className="p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-full">{selectedEvent.date}</span>
+                {selectedEvent.location && (
+                  <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">{selectedEvent.location}</span>
+                )}
+                {selectedEvent.videoUrl && (
+                  <a href={selectedEvent.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full hover:bg-red-100 transition-colors">
+                    <Play size={12}/> Ver Video
+                  </a>
+                )}
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-4 leading-tight">{selectedEvent.title}</h2>
+              <p className="text-slate-600 leading-relaxed whitespace-pre-line">{selectedEvent.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

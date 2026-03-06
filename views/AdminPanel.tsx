@@ -303,7 +303,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
         alert('Error de conexión al crear la noticia.');
       }
     } else {
-        alert("Por favor completa el título, la descripción y sube una imagen.");
+        alert("Por favor completa el título, la descripción y sube al menos una imagen o video.");
     }
   };
 
@@ -804,7 +804,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                     <div className="pt-4">
                         <button 
                             onClick={handleAddNews} 
-                            disabled={!newNews.title || !(newNews.imageUrl || newNews.videoUrl)}
+                            disabled={!newNews.title || !newNews.description || !(newNews.imageUrl || newNews.videoUrl)}
                             className="w-full bg-blue-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg shadow-blue-600/20"
                         >
                         <Save size={20} /> Publicar

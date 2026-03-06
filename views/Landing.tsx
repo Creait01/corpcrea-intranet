@@ -113,19 +113,19 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
             key={item.id}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentNewsIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
           >
-            {/* Video as cover if no image, or image as cover */}
-            {!item.imageUrl && item.videoUrl ? (
+            {/* Video ALWAYS takes priority as cover */}
+            {item.videoUrl ? (
               <video
                 src={item.videoUrl}
                 className="absolute inset-0 w-full h-full object-cover"
                 autoPlay muted loop playsInline
               />
-            ) : (
+            ) : item.imageUrl ? (
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
                 style={{ backgroundImage: `url(${item.imageUrl})`, transform: index === currentNewsIndex ? 'scale(1.05)' : 'scale(1)' }}
               />
-            )}
+            ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-[#25282A] via-[#25282A]/60 to-[#1D3C34]/40" />
             
             <div className="absolute inset-0 flex items-end">

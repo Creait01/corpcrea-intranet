@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  AppState, AppActions, UserRole, NewsItem, EventItem, CeoMessageContent, DocumentItem, Task, TaskStatus, SocialBenefitsRequest, OdooDashboardState, CorporateCompany, Promotion 
+  AppState, AppActions, UserRole, NewsItem, EventItem, CeoMessageContent, DocumentItem, Task, TaskStatus, SocialBenefitsRequest, OdooDashboardState, CorporateCompany, Promotion, NewHire 
 } from './types';
 import { INITIAL_NEWS, INITIAL_EVENTS, INITIAL_EMPLOYEES, INITIAL_DOCUMENTS, MOCK_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES, INITIAL_CEO_MESSAGE, INITIAL_PROJECTS, INITIAL_TASKS, INITIAL_CALENDAR_EVENTS, INITIAL_VACATION_REQUESTS, INITIAL_TRAININGS, INITIAL_DEPARTMENTS, INITIAL_NOTIFICATIONS, INITIAL_DOCUMENT_REQUESTS, INITIAL_SOCIAL_BENEFITS_REQUESTS } from './data';
 import { Landing } from './views/Landing';
@@ -53,7 +53,8 @@ const App: React.FC = () => {
     socialBenefitsRequests: INITIAL_SOCIAL_BENEFITS_REQUESTS,
     corporateCompanies: [],
     siteLogoUrl: '',
-    promotions: []
+    promotions: [],
+    newHires: []
   });
 
   // Fetch corporate companies and site logo on mount + restore token
@@ -76,6 +77,12 @@ const App: React.FC = () => {
     fetch('/api/admin/promotions')
       .then(r => r.ok ? r.json() : [])
       .then(promotions => setData(prev => ({ ...prev, promotions })))
+      .catch(() => {});
+
+    // Fetch new hires
+    fetch('/api/admin/new-hires')
+      .then(r => r.ok ? r.json() : [])
+      .then(newHires => setData(prev => ({ ...prev, newHires })))
       .catch(() => {});
 
     // Settings: use token if available so we get the logo
@@ -458,6 +465,14 @@ const App: React.FC = () => {
     setData(prev => ({ ...prev, promotions: prev.promotions.filter(p => p.id !== id) }));
   };
 
+  const addNewHire = (hire: NewHire) => {
+    setData(prev => ({ ...prev, newHires: [hire, ...prev.newHires] }));
+  };
+
+  const deleteNewHire = (id: string) => {
+    setData(prev => ({ ...prev, newHires: prev.newHires.filter(h => h.id !== id) }));
+  };
+
   const actions: AppActions = {
     addNews, deleteNews, addEvent, deleteEvent, login, logout,
     sendMessage, createGroupChannel, createDirectChannel, updateCeoMessage,
@@ -466,7 +481,7 @@ const App: React.FC = () => {
     markTrainingComplete, addDepartment, deleteDepartment,
     requestDocument, markNotificationRead, requestSocialBenefits,
     addCorporateCompany, deleteCorporateCompany, updateSiteLogoUrl,
-    addPromotion, deletePromotion
+    addPromotion, deletePromotion, addNewHire, deleteNewHire
   };
 
   // Router / View Switcher logic

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../prisma.js';
 import { authMiddleware, requireRole } from '../middleware/auth.js';
 const router = Router();
@@ -175,31 +176,91 @@ router.put('/users/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (r
         res.status(500).json({ error: 'Error interno' });
     }
 });
-// ================== CORPORATE COMPANIES ==================
-// GET /api/admin/new-hires (recently approved users — last 30 days)
-router.get('/new-hires', authMiddleware, async (_req, res) => {
+// PUT /api/admin/users/:id/role — Change role for approved user
+router.put('/users/:id/role', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
     try {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const users = await prisma.user.findMany({
-            where: {
-                approved: true,
-                createdAt: { gte: thirtyDaysAgo },
-            },
-            select: {
-                id: true, name: true, avatar: true, position: true, department: true, createdAt: true,
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 10,
+        const { role } = req.body;
+        if (!role) {
+            res.status(400).json({ error: 'El rol es requerido' });
+            return;
+        }
+        const user = await prisma.user.update({
+            where: { id: String(req.params.id) },
+            data: { role },
+            select: { id: true, name: true, email: true, role: true, position: true, department: true, avatar: true, approved: true },
         });
-        res.json(users);
+        res.json(user);
     }
     catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error interno' });
     }
 });
-// GET /api/admin/corporate-companies (public for landing)
+// PUT /api/admin/users/:id/password — Reset password for a user
+router.put('/users/:id/password', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password || password.length < 6) {
+            res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+            return;
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await prisma.user.update({
+            where: { id: String(req.params.id) },
+            data: { password: hashedPassword },
+        });
+        res.json({ success: true, message: 'Contraseña actualizada correctamente' });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// ================== NEW HIRES / NUEVOS INGRESOS ==================
+// GET /api/admin/new-hires (public for landing/dashboard)
+router.get('/new-hires', async (_req, res) => {
+    try {
+        const hires = await prisma.newHire.findMany({ orderBy: { createdAt: 'desc' } });
+        res.json(hires);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// POST /api/admin/new-hires
+router.post('/new-hires', authMiddleware, requireRole('CEO', 'MANAGER', 'HR'), async (req, res) => {
+    try {
+        const { employeeName, position, department, date, description, photoUrl } = req.body;
+        const hire = await prisma.newHire.create({
+            data: {
+                employeeName,
+                position: position || '',
+                department: department || '',
+                date: date || new Date().toISOString().split('T')[0],
+                description: description || '',
+                photoUrl: photoUrl || null,
+            },
+        });
+        res.status(201).json(hire);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// DELETE /api/admin/new-hires/:id
+router.delete('/new-hires/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'HR'), async (req, res) => {
+    try {
+        await prisma.newHire.delete({ where: { id: String(req.params.id) } });
+        res.json({ success: true });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// ================== CORPORATE COMPANIES ==================
 router.get('/corporate-companies', async (_req, res) => {
     try {
         const companies = await prisma.corporateCompany.findMany({ orderBy: { sortOrder: 'asc' } });

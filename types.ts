@@ -257,6 +257,16 @@ export interface Promotion {
   photoUrl?: string;
 }
 
+export interface NewHire {
+  id: string;
+  employeeName: string;
+  position: string;
+  department: string;
+  date: string;
+  description: string;
+  photoUrl?: string;
+}
+
 export interface SocialBenefitsRequest {
   id: string;
   userId: string;
@@ -288,6 +298,7 @@ export interface AppState {
   corporateCompanies: CorporateCompany[];
   siteLogoUrl: string;
   promotions: Promotion[];
+  newHires: NewHire[];
 }
 
 export interface AppActions {
@@ -327,4 +338,7 @@ export interface AppActions {
   // Promotions
   addPromotion: (promo: Promotion) => void;
   deletePromotion: (id: string) => void;
+  // New Hires
+  addNewHire: (hire: NewHire) => void;
+  deleteNewHire: (id: string) => void;
 }

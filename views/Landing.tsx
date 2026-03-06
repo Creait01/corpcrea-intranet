@@ -365,6 +365,40 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
               </div>
             </div>
           )}
+
+          {/* New Hires */}
+          {data.newHires && data.newHires.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-2xl font-black text-[#25282A] text-center mb-8">Nuevos Ingresos</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {data.newHires.slice(0, 6).map(nh => (
+                  <div key={nh.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                    <div className="flex items-center gap-4 mb-4">
+                      {nh.photoUrl ? (
+                        <img src={nh.photoUrl} alt={nh.employeeName} className="w-14 h-14 rounded-full object-cover ring-2 ring-[#1D3C34]/40 group-hover:ring-[#1D3C34] transition-all"/>
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-bold text-xl">
+                          {nh.employeeName.charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-black text-[#25282A]">{nh.employeeName}</h4>
+                        <p className="text-xs text-slate-400">{nh.department}</p>
+                      </div>
+                    </div>
+                    <div className="bg-[#1D3C34]/5 rounded-xl p-3 mb-3">
+                      <p className="text-xs text-slate-500">Cargo</p>
+                      <p className="text-sm font-bold text-[#1D3C34]">{nh.position || 'Sin asignar'}</p>
+                    </div>
+                    {nh.description && (
+                      <p className="text-sm text-slate-600 mt-2">{nh.description}</p>
+                    )}
+                    <p className="text-xs text-slate-400 mt-3 text-right">Ingreso: {nh.date}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

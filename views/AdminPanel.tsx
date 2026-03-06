@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department, CorporateCompany, Promotion } from '../types';
-import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff, Building2, TrendingUp } from 'lucide-react';
+import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department, CorporateCompany, Promotion, NewHire } from '../types';
+import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff, Building2, TrendingUp, UserPlus2, KeyRound, Edit3 } from 'lucide-react';
 import { odooApi } from '../services/odooApi';
 import { CloudinaryUpload } from '../components/CloudinaryUpload';
 import { cloudinaryService } from '../services/cloudinaryUpload';
@@ -14,7 +14,7 @@ interface AdminPanelProps {
 // Legacy ImageUploadField removed — now using CloudinaryUpload component
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack }) => {
-  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'users' | 'settings' | 'promotions'>('news');
+  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'users' | 'settings' | 'promotions' | 'newhires' | 'usermgmt'>('news');
   const user = data.currentUser;
   
   // Local state for forms
@@ -33,6 +33,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
 
   // Promotion Form State
   const [newPromo, setNewPromo] = useState<Partial<Promotion>>({ employeeName: '', previousPosition: '', newPosition: '', department: '', date: '', description: '', photoUrl: '' });
+
+  // New Hire Form State
+  const [newHire, setNewHire] = useState<Partial<NewHire>>({ employeeName: '', position: '', department: '', date: '', description: '', photoUrl: '' });
+
+  // Approved Users Management State
+  const [approvedUsers, setApprovedUsers] = useState<any[]>([]);
+  const [approvedLoading, setApprovedLoading] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editRole, setEditRole] = useState('');
+  const [resetPasswordId, setResetPasswordId] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState('');
 
   // Site Logo State
   const [siteLogoUrl, setSiteLogoUrl] = useState(data.siteLogoUrl || '');
@@ -409,6 +422,105 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
     }
   };
 
+  // ======= New Hire Handlers =======
+  const handleAddNewHire = async () => {
+    if (newHire.employeeName) {
+      try {
+        const res = await fetch('/api/admin/new-hires', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify(newHire),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          actions.addNewHire(created);
+          setNewHire({ employeeName: '', position: '', department: '', date: '', description: '', photoUrl: '' });
+        }
+      } catch (err) {
+        console.error('Error adding new hire:', err);
+      }
+    }
+  };
+
+  const handleDeleteNewHire = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/new-hires/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) actions.deleteNewHire(id);
+    } catch (err) {
+      console.error('Error deleting new hire:', err);
+    }
+  };
+
+  // ======= Approved Users Management =======
+  const fetchApprovedUsers = async () => {
+    setApprovedLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) setApprovedUsers(await res.json());
+    } catch (err) {
+      console.error('Error fetching approved users:', err);
+    } finally {
+      setApprovedLoading(false);
+    }
+  };
+
+  const handleChangeRole = async (userId: string) => {
+    if (!editRole) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({ role: editRole }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setApprovedUsers(prev => prev.map(u => u.id === userId ? { ...u, ...updated } : u));
+        setEditingUserId(null);
+        setEditRole('');
+      }
+    } catch (err) {
+      console.error('Error changing role:', err);
+    }
+  };
+
+  const handleResetPassword = async (userId: string) => {
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordMsg('Mínimo 6 caracteres');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if (res.ok) {
+        setPasswordMsg('Contraseña actualizada ✓');
+        setNewPassword('');
+        setTimeout(() => { setResetPasswordId(null); setPasswordMsg(''); }, 2000);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setPasswordMsg(err.error || 'Error al actualizar');
+      }
+    } catch (err) {
+      setPasswordMsg('Error de conexión');
+    }
+  };
+
   const handleSaveSiteLogo = async () => {
     try {
       const res = await fetch('/api/admin/settings', {
@@ -503,6 +615,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                 <TrendingUp size={18}/> Ascensos
               </button>
               <button 
+                onClick={() => setActiveSection('newhires')}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'newhires' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              >
+                <UserPlus2 size={18}/> Nuevos Ingresos
+              </button>
+              <button 
                 onClick={() => setActiveSection('docs')}
                 className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'docs' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
               >
@@ -522,6 +640,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                 {pendingUsers.length > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{pendingUsers.length}</span>
                 )}
+              </button>
+              <button 
+                onClick={() => { setActiveSection('usermgmt'); fetchApprovedUsers(); }}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'usermgmt' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              >
+                <KeyRound size={18}/> Gestión de Usuarios
               </button>
             </>
           )}
@@ -1123,12 +1247,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Foto (URL)</label>
-                    <input 
-                      placeholder="URL de la foto del empleado" 
-                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
-                      value={newPromo.photoUrl || ''} 
-                      onChange={e => setNewPromo({...newPromo, photoUrl: e.target.value})}
+                    <CloudinaryUpload 
+                      label="Foto del Empleado"
+                      accept="image/*"
+                      folder="corpocrea/promotions"
+                      variant="compact"
+                      currentUrl={newPromo.photoUrl || ''}
+                      onUpload={(result) => setNewPromo({...newPromo, photoUrl: result.url})}
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -1175,6 +1300,242 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                         <button onClick={() => handleDeletePromotion(p.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                           <Trash2 size={16}/>
                         </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ====== NUEVOS INGRESOS ====== */}
+          {activeSection === 'newhires' && (
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
+                  <Plus className="text-blue-600" /> Registrar Nuevo Ingreso
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del Empleado</label>
+                      <input 
+                        placeholder="Ej: Carlos Rodríguez" 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={newHire.employeeName || ''} 
+                        onChange={e => setNewHire({...newHire, employeeName: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Cargo</label>
+                      <input 
+                        placeholder="Ej: Analista de Datos" 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={newHire.position || ''} 
+                        onChange={e => setNewHire({...newHire, position: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Departamento</label>
+                      <input 
+                        placeholder="Ej: Tecnología" 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={newHire.department || ''} 
+                        onChange={e => setNewHire({...newHire, department: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Ingreso</label>
+                      <input 
+                        type="date"
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={newHire.date || ''} 
+                        onChange={e => setNewHire({...newHire, date: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Descripción / Bienvenida</label>
+                      <textarea 
+                        placeholder="Mensaje de bienvenida o descripción..." 
+                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                        value={newHire.description || ''} 
+                        onChange={e => setNewHire({...newHire, description: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <CloudinaryUpload 
+                      label="Foto del Empleado"
+                      accept="image/*"
+                      folder="corpocrea/newhires"
+                      currentUrl={newHire.photoUrl || ''}
+                      onUpload={(result) => setNewHire({...newHire, photoUrl: result.url})}
+                    />
+                    <div className="mt-auto pt-4">
+                      <button 
+                        onClick={handleAddNewHire} 
+                        disabled={!newHire.employeeName}
+                        className="w-full bg-blue-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg shadow-blue-600/20"
+                      >
+                        <UserPlus2 size={18}/> Registrar Nuevo Ingreso
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* New Hires List */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Nuevos Ingresos Registrados</h3>
+                {data.newHires.length === 0 ? (
+                  <p className="text-sm text-slate-400 italic text-center py-8">No hay nuevos ingresos registrados aún.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {data.newHires.map(h => (
+                      <div key={h.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        {h.photoUrl ? (
+                          <img src={h.photoUrl} alt={h.employeeName} className="w-12 h-12 rounded-full object-cover ring-2 ring-[#1D3C34]"/>
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-bold text-lg">
+                            {h.employeeName.charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-slate-800">{h.employeeName}</h4>
+                          <p className="text-sm text-slate-500">{h.position} — <span className="text-[#1D3C34] font-semibold">{h.department}</span></p>
+                          <p className="text-xs text-slate-400">Ingreso: {h.date}</p>
+                        </div>
+                        <button onClick={() => handleDeleteNewHire(h.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 size={16}/>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ====== GESTIÓN DE USUARIOS (Rol + Contraseña) ====== */}
+          {activeSection === 'usermgmt' && (
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <KeyRound className="text-blue-600" size={22}/> Gestión de Usuarios Aprobados
+                  </h2>
+                  <button onClick={fetchApprovedUsers} className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+                    {approvedLoading ? <Loader2 size={14} className="animate-spin"/> : null} Actualizar
+                  </button>
+                </div>
+
+                <p className="text-sm text-slate-500 mb-6">Aquí puedes cambiar el rol o restablecer la contraseña de los usuarios aprobados.</p>
+
+                {approvedUsers.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400">
+                    <Users size={48} className="mx-auto mb-3 opacity-30"/>
+                    <p className="font-medium">No hay usuarios aprobados</p>
+                    <p className="text-sm">Haz clic en "Actualizar" para cargar la lista.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {approvedUsers.map(u => (
+                      <div key={u.id} className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 hover:bg-white transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1D3C34] to-[#25282A] flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                            {u.avatar ? <img src={u.avatar} className="w-full h-full object-cover" alt=""/> : u.name?.charAt(0) || '?'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-slate-800 text-sm">{u.name}</h3>
+                            <p className="text-xs text-slate-500">{u.email} • {u.position || 'Sin cargo'} • {u.department || 'Sin depto.'}</p>
+                          </div>
+                          <span className="px-2.5 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">{u.role}</span>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => { setEditingUserId(editingUserId === u.id ? null : u.id); setEditRole(u.role); setResetPasswordId(null); }}
+                              className={`p-2 rounded-lg transition-colors text-sm ${editingUserId === u.id ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'}`}
+                              title="Cambiar rol"
+                            >
+                              <Edit3 size={16}/>
+                            </button>
+                            <button
+                              onClick={() => { setResetPasswordId(resetPasswordId === u.id ? null : u.id); setNewPassword(''); setPasswordMsg(''); setEditingUserId(null); }}
+                              className={`p-2 rounded-lg transition-colors text-sm ${resetPasswordId === u.id ? 'bg-amber-100 text-amber-700' : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'}`}
+                              title="Cambiar contraseña"
+                            >
+                              <KeyRound size={16}/>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Change Role Panel */}
+                        {editingUserId === u.id && (
+                          <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-3">
+                            <label className="text-sm font-medium text-slate-600 whitespace-nowrap">Nuevo Rol:</label>
+                            <select 
+                              value={editRole} 
+                              onChange={e => setEditRole(e.target.value)} 
+                              className="flex-1 p-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            >
+                              <option value="EMPLOYEE">Empleado</option>
+                              <option value="CONTENT_MANAGER">Gestor de Contenido</option>
+                              <option value="HR">Recursos Humanos</option>
+                              <option value="MANAGER">Gerente</option>
+                              <option value="CEO">CEO</option>
+                              <option value="ARCHITECT">Arquitecto</option>
+                              <option value="ENGINEER">Ingeniero</option>
+                            </select>
+                            <button 
+                              onClick={() => handleChangeRole(u.id)} 
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+                            >
+                              Guardar
+                            </button>
+                            <button onClick={() => setEditingUserId(null)} className="px-3 py-2 text-slate-500 hover:text-slate-700 text-sm">
+                              Cancelar
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Reset Password Panel */}
+                        {resetPasswordId === u.id && (
+                          <div className="mt-3 pt-3 border-t border-slate-200">
+                            <div className="flex items-center gap-3">
+                              <label className="text-sm font-medium text-slate-600 whitespace-nowrap">Nueva Contraseña:</label>
+                              <div className="relative flex-1">
+                                <input
+                                  type={showNewPassword ? 'text' : 'password'}
+                                  placeholder="Mínimo 6 caracteres"
+                                  value={newPassword}
+                                  onChange={e => { setNewPassword(e.target.value); setPasswordMsg(''); }}
+                                  className="w-full p-2 pr-10 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowNewPassword(!showNewPassword)}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                >
+                                  {showNewPassword ? <EyeOff size={14}/> : <Eye size={14}/>}
+                                </button>
+                              </div>
+                              <button 
+                                onClick={() => handleResetPassword(u.id)} 
+                                disabled={!newPassword || newPassword.length < 6}
+                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-300 text-white rounded-lg font-medium text-sm transition-colors"
+                              >
+                                Restablecer
+                              </button>
+                              <button onClick={() => { setResetPasswordId(null); setPasswordMsg(''); }} className="px-3 py-2 text-slate-500 hover:text-slate-700 text-sm">
+                                Cancelar
+                              </button>
+                            </div>
+                            {passwordMsg && (
+                              <p className={`text-xs mt-2 ${passwordMsg.includes('✓') ? 'text-green-600' : 'text-red-500'}`}>{passwordMsg}</p>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

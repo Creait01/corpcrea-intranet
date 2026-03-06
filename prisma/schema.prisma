@@ -428,3 +428,20 @@ model Promotion {
 
   @@map("promotions")
 }
+
+// ============================
+// New Hires / Nuevos Ingresos
+// ============================
+
+model NewHire {
+  id            String   @id @default(cuid())
+  employeeName  String   @map("employee_name")
+  position      String   @default("")
+  department    String   @default("")
+  date          String   // Fecha de ingreso
+  description   String   @default("")
+  photoUrl      String?  @map("photo_url")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("new_hires")
+}

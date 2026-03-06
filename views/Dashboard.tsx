@@ -472,9 +472,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [selectedDocDept, setSelectedDocDept] = useState<string>('All');
   const [activeDocTab, setActiveDocTab] = useState<'documents' | 'templates'>('documents');
 
-  // New Hires State  
-  const [newHires, setNewHires] = useState<any[]>([]);
-
   const user = data.currentUser as User;
   const unreadNotifications = data.notifications?.filter(n => n.userId === user.id && !n.read).length || 0;
 
@@ -506,16 +503,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Selected Project logic: Ensure selected project is actually visible
   const currentProject = visibleProjects.find(p => p.id === selectedProjectId);
   const currentProjectTasks = selectedProjectId ? visibleTasks.filter(t => t.projectId === selectedProjectId) : [];
-
-  // Fetch new hires (recently approved users)
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    fetch('/api/admin/new-hires', { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : [])
-      .then(setNewHires)
-      .catch(() => {});
-  }, []);
 
   const handleSendMessage = () => {
     if (!chatInput.trim()) return;
@@ -817,16 +804,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 )}
               </div>
 
-              {/* New Hires (recently approved employees) */}
+              {/* New Hires */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><UserPlus2 className="text-green-500" size={20}/> Nuevos Ingresos</h3>
-                {newHires.length > 0 ? (
+                {data.newHires.length > 0 ? (
                   <div className="space-y-3">
-                    {newHires.slice(0, 5).map((nh: any) => (
+                    {data.newHires.slice(0, 5).map((nh) => (
                       <div key={nh.id} className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-transparent rounded-xl border border-green-100">
-                        <img src={nh.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(nh.name)}&background=1D3C34&color=fff`} alt={nh.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-green-200"/>
+                        {nh.photoUrl ? (
+                          <img src={nh.photoUrl} alt={nh.employeeName} className="w-10 h-10 rounded-full object-cover ring-2 ring-green-200"/>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-bold text-sm ring-2 ring-green-200">
+                            {nh.employeeName.charAt(0)}
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm text-slate-800">{nh.name}</p>
+                          <p className="font-bold text-sm text-slate-800">{nh.employeeName}</p>
                           <p className="text-xs text-slate-500">{nh.position || 'Sin asignar'} • {nh.department || 'Sin departamento'}</p>
                         </div>
                         <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full">NUEVO</span>

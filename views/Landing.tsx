@@ -276,109 +276,39 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
             </h2>
           </div>
 
-          {/* === ROW 1: Employee of Month + Birthdays + Anniversaries === */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
-            
-            {/* Employee of the Month — spans 6 cols */}
-            {employeeOfMonth && (
-              <div className="lg:col-span-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1D3C34] via-[#1D3C34]/95 to-[#25282A] text-white p-5 flex items-center gap-5 shadow-xl shadow-[#1D3C34]/15 group hover:shadow-2xl transition-all duration-500">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-[#CBA052] blur-[120px] opacity-15 rounded-full group-hover:opacity-25 transition-opacity"></div>
-                <div className="absolute top-2 right-3 text-[#CBA052]/10 text-5xl font-black leading-none select-none pointer-events-none">★</div>
-                <div className="absolute inset-0 rounded-2xl border border-[#CBA052]/10 group-hover:border-[#CBA052]/25 transition-colors"></div>
+          {/* === ROW 1: Employee of the Month (full width) === */}
+          {employeeOfMonth && (
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1D3C34] via-[#1D3C34]/95 to-[#25282A] text-white p-5 flex items-center gap-5 shadow-xl shadow-[#1D3C34]/15 group hover:shadow-2xl transition-all duration-500 mb-4">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#CBA052] blur-[120px] opacity-15 rounded-full group-hover:opacity-25 transition-opacity"></div>
+              <div className="absolute top-2 right-3 text-[#CBA052]/10 text-5xl font-black leading-none select-none pointer-events-none">★</div>
+              <div className="absolute inset-0 rounded-2xl border border-[#CBA052]/10 group-hover:border-[#CBA052]/25 transition-colors"></div>
 
-                <div className="relative w-20 h-20 flex-shrink-0">
-                  <div className="absolute inset-[-4px] border-2 border-[#CBA052]/40 rounded-full" style={{animation: 'spin 20s linear infinite'}}></div>
-                  <div className="absolute inset-[-2px] bg-gradient-to-br from-[#CBA052]/30 to-transparent rounded-full blur-sm"></div>
-                  <img src={employeeOfMonth.photo} alt={employeeOfMonth.name} className="w-full h-full object-cover rounded-full border-3 border-[#1D3C34] shadow-xl group-hover:scale-105 transition-transform duration-500"/>
-                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] text-white p-1.5 rounded-xl border-3 border-[#1D3C34] shadow-lg shadow-[#CBA052]/30">
-                    <Award size={14} />
-                  </div>
-                </div>
-
-                <div className="relative flex-1 min-w-0">
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#CBA052]/15 rounded-full mb-2 border border-[#CBA052]/20">
-                    <div className="w-1 h-1 rounded-full bg-[#CBA052] animate-pulse"></div>
-                    <span className="text-[#CBA052] font-black uppercase tracking-[0.15em] text-[8px]">Empleado del Mes</span>
-                  </div>
-                  <p className="text-lg font-black text-white leading-tight truncate">{employeeOfMonth.name}</p>
-                  <p className="text-[#A2B2C8]/80 text-xs font-medium truncate">{employeeOfMonth.position} · {employeeOfMonth.department}</p>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {employeeOfMonth.skills.slice(0, 3).map(skill => (
-                      <span key={skill} className="px-2 py-0.5 bg-white/8 rounded-full text-[10px] text-white/60 font-medium border border-white/10">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Birthdays — spans 3 cols */}
-            <div className={`${employeeOfMonth ? 'lg:col-span-3' : 'lg:col-span-6'} relative overflow-hidden rounded-2xl bg-white p-4 border border-pink-100/80 shadow-md hover:shadow-lg transition-all duration-300 group`}>
-              <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-pink-200 to-rose-300 rounded-full opacity-20"></div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg text-white shadow-sm shadow-pink-500/20">
-                  <Gift size={14} />
-                </div>
-                <h3 className="font-black text-[#25282A] text-sm">Cumpleaños</h3>
-                <span className="text-[10px] text-pink-400 font-medium ml-auto">Este mes</span>
-              </div>
-              <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1" style={{scrollbarWidth: 'thin'}}>
-                {birthdays.length > 0 ? birthdays.map(emp => (
-                  <div key={emp.id} className="flex items-center gap-2 bg-pink-50/60 p-2 rounded-lg border border-pink-100/40 hover:border-pink-200 transition-all">
-                    <div className="relative flex-shrink-0">
-                      <img src={emp.photo} className="w-8 h-8 rounded-full object-cover ring-1 ring-pink-300" alt={emp.name} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-xs text-[#25282A] truncate">{emp.name}</p>
-                      <p className="text-[10px] text-pink-500 font-semibold">{emp.birthDate}</p>
-                    </div>
-                  </div>
-                )) : (
-                  <div className="text-center py-3">
-                    <span className="text-2xl opacity-30">🎈</span>
-                    <p className="text-xs text-slate-400 italic mt-1">Sin cumpleaños</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Anniversaries — spans 3 cols */}
-            <div className={`${employeeOfMonth ? 'lg:col-span-3' : 'lg:col-span-6'} relative overflow-hidden rounded-2xl bg-white p-4 border border-[#A2B2C8]/30 shadow-md hover:shadow-lg transition-all duration-300 group`}>
-              <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-[#A2B2C8] to-[#1D3C34] rounded-full opacity-15"></div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-lg text-white shadow-sm shadow-[#1D3C34]/20">
+              <div className="relative w-20 h-20 flex-shrink-0">
+                <div className="absolute inset-[-4px] border-2 border-[#CBA052]/40 rounded-full" style={{animation: 'spin 20s linear infinite'}}></div>
+                <div className="absolute inset-[-2px] bg-gradient-to-br from-[#CBA052]/30 to-transparent rounded-full blur-sm"></div>
+                <img src={employeeOfMonth.photo} alt={employeeOfMonth.name} className="w-full h-full object-cover rounded-full border-3 border-[#1D3C34] shadow-xl group-hover:scale-105 transition-transform duration-500"/>
+                <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] text-white p-1.5 rounded-xl border-3 border-[#1D3C34] shadow-lg shadow-[#CBA052]/30">
                   <Award size={14} />
                 </div>
-                <h3 className="font-black text-[#25282A] text-sm">Aniversarios</h3>
-                <span className="text-[10px] text-[#1D3C34]/50 font-medium ml-auto">Este mes</span>
               </div>
-              <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1" style={{scrollbarWidth: 'thin'}}>
-                {anniversaries.length > 0 ? anniversaries.map(emp => {
-                  const years = new Date().getFullYear() - new Date(emp.startDate).getFullYear();
-                  return (
-                  <div key={emp.id} className="flex items-center gap-2 bg-[#1D3C34]/5 p-2 rounded-lg border border-[#A2B2C8]/15 hover:border-[#A2B2C8]/35 transition-all">
-                    <div className="relative flex-shrink-0">
-                      <img src={emp.photo} className="w-8 h-8 rounded-full object-cover ring-1 ring-[#A2B2C8]" alt={emp.name} />
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#1D3C34] rounded-full flex items-center justify-center">
-                        <span className="text-white text-[6px] font-black">{years}</span>
-                      </div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold text-xs text-[#25282A] truncate">{emp.name}</p>
-                      <p className="text-[10px] text-[#1D3C34] font-semibold">{years} {years === 1 ? 'año' : 'años'}</p>
-                    </div>
-                  </div>
-                  );
-                }) : (
-                  <div className="text-center py-3">
-                    <span className="text-2xl opacity-30">📅</span>
-                    <p className="text-xs text-slate-400 italic mt-1">Sin aniversarios</p>
-                  </div>
-                )}
+
+              <div className="relative flex-1 min-w-0">
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#CBA052]/15 rounded-full mb-2 border border-[#CBA052]/20">
+                  <div className="w-1 h-1 rounded-full bg-[#CBA052] animate-pulse"></div>
+                  <span className="text-[#CBA052] font-black uppercase tracking-[0.15em] text-[8px]">Empleado del Mes</span>
+                </div>
+                <p className="text-lg font-black text-white leading-tight truncate">{employeeOfMonth.name}</p>
+                <p className="text-[#A2B2C8]/80 text-xs font-medium truncate">{employeeOfMonth.position} · {employeeOfMonth.department}</p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {employeeOfMonth.skills.slice(0, 4).map(skill => (
+                    <span key={skill} className="px-2 py-0.5 bg-white/8 rounded-full text-[10px] text-white/60 font-medium border border-white/10">{skill}</span>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* === ROW 2: Promotions + New Hires side by side as compact list cards === */}
+          {/* === ROW 2: Birthdays + Anniversaries + Promotions + New Hires — single row === */}
           {(() => {
             const now = Date.now();
             const recentPromos = (data.promotions || []).filter(p => {
@@ -389,88 +319,144 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
               const d = new Date(nh.date).getTime();
               return !isNaN(d) && (now - d) <= 30 * 24 * 60 * 60 * 1000;
             });
-            const hasPromos = recentPromos.length > 0;
-            const hasHires = recentHires.length > 0;
-            if (!hasPromos && !hasHires) return null;
+
+            // Count how many panels we have (birthdays & anniversaries always show)
+            const panels: string[] = ['birthdays', 'anniversaries'];
+            if (recentPromos.length > 0) panels.push('promos');
+            if (recentHires.length > 0) panels.push('hires');
+            const colClass = panels.length === 4 ? 'lg:grid-cols-4' : panels.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2';
+
             return (
-            <div className={`grid grid-cols-1 ${hasPromos && hasHires ? 'lg:grid-cols-2' : ''} gap-4`}>
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${colClass} gap-3`}>
               
-              {/* Promotions Card */}
-              {hasPromos && (
-                <div className="relative overflow-hidden rounded-2xl bg-white border border-[#CBA052]/15 shadow-md hover:shadow-lg transition-all">
-                  {/* Header bar */}
-                  <div className="flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-[#CBA052]/5 via-transparent to-transparent border-b border-[#CBA052]/10">
-                    <div className="p-1.5 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-lg text-white shadow-sm shadow-[#CBA052]/25">
-                      <ArrowRight size={14} className="rotate-[-90deg]" />
-                    </div>
-                    <h3 className="font-black text-[#25282A] text-sm">Ascensos Recientes</h3>
-                    <span className="ml-auto px-2 py-0.5 bg-[#CBA052]/10 text-[#CBA052] text-[10px] font-black rounded-full">{recentPromos.length}</span>
+              {/* Birthdays */}
+              <div className="relative overflow-hidden rounded-2xl bg-white p-4 border border-pink-100/80 shadow-md hover:shadow-lg transition-all duration-300 group">
+                <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-pink-200 to-rose-300 rounded-full opacity-20"></div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg text-white shadow-sm shadow-pink-500/20">
+                    <Gift size={14} />
                   </div>
-                  {/* List */}
-                  <div className="divide-y divide-slate-100 max-h-[220px] overflow-y-auto" style={{scrollbarWidth: 'thin'}}>
+                  <h3 className="font-black text-[#25282A] text-xs">Cumpleaños</h3>
+                  <span className="text-[9px] text-pink-400 font-medium ml-auto">Este mes</span>
+                </div>
+                <div className="space-y-1 max-h-[140px] overflow-y-auto pr-0.5" style={{scrollbarWidth: 'thin'}}>
+                  {birthdays.length > 0 ? birthdays.map(emp => (
+                    <div key={emp.id} className="flex items-center gap-2 bg-pink-50/60 p-1.5 rounded-lg border border-pink-100/40 hover:border-pink-200 transition-all">
+                      <img src={emp.photo} className="w-7 h-7 rounded-full object-cover ring-1 ring-pink-300 flex-shrink-0" alt={emp.name} />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-[11px] text-[#25282A] truncate">{emp.name}</p>
+                        <p className="text-[9px] text-pink-500 font-semibold">{emp.birthDate}</p>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-center py-3">
+                      <span className="text-xl opacity-30">🎈</span>
+                      <p className="text-[10px] text-slate-400 italic mt-1">Sin cumpleaños</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Anniversaries */}
+              <div className="relative overflow-hidden rounded-2xl bg-white p-4 border border-[#A2B2C8]/30 shadow-md hover:shadow-lg transition-all duration-300 group">
+                <div className="absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br from-[#A2B2C8] to-[#1D3C34] rounded-full opacity-15"></div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-lg text-white shadow-sm shadow-[#1D3C34]/20">
+                    <Award size={14} />
+                  </div>
+                  <h3 className="font-black text-[#25282A] text-xs">Aniversarios</h3>
+                  <span className="text-[9px] text-[#1D3C34]/50 font-medium ml-auto">Este mes</span>
+                </div>
+                <div className="space-y-1 max-h-[140px] overflow-y-auto pr-0.5" style={{scrollbarWidth: 'thin'}}>
+                  {anniversaries.length > 0 ? anniversaries.map(emp => {
+                    const years = new Date().getFullYear() - new Date(emp.startDate).getFullYear();
+                    return (
+                    <div key={emp.id} className="flex items-center gap-2 bg-[#1D3C34]/5 p-1.5 rounded-lg border border-[#A2B2C8]/15 hover:border-[#A2B2C8]/35 transition-all">
+                      <div className="relative flex-shrink-0">
+                        <img src={emp.photo} className="w-7 h-7 rounded-full object-cover ring-1 ring-[#A2B2C8]" alt={emp.name} />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#1D3C34] rounded-full flex items-center justify-center">
+                          <span className="text-white text-[5px] font-black">{years}</span>
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-bold text-[11px] text-[#25282A] truncate">{emp.name}</p>
+                        <p className="text-[9px] text-[#1D3C34] font-semibold">{years} {years === 1 ? 'año' : 'años'}</p>
+                      </div>
+                    </div>
+                    );
+                  }) : (
+                    <div className="text-center py-3">
+                      <span className="text-xl opacity-30">📅</span>
+                      <p className="text-[10px] text-slate-400 italic mt-1">Sin aniversarios</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Promotions */}
+              {recentPromos.length > 0 && (
+                <div className="relative overflow-hidden rounded-2xl bg-white border border-[#CBA052]/15 shadow-md hover:shadow-lg transition-all group">
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#CBA052]/5 via-transparent to-transparent border-b border-[#CBA052]/10">
+                    <div className="p-1.5 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-lg text-white shadow-sm shadow-[#CBA052]/25">
+                      <ArrowRight size={12} className="rotate-[-90deg]" />
+                    </div>
+                    <h3 className="font-black text-[#25282A] text-xs">Ascensos</h3>
+                    <span className="ml-auto px-1.5 py-0.5 bg-[#CBA052]/10 text-[#CBA052] text-[9px] font-black rounded-full">{recentPromos.length}</span>
+                  </div>
+                  <div className="divide-y divide-slate-50 max-h-[140px] overflow-y-auto" style={{scrollbarWidth: 'thin'}}>
                     {recentPromos.slice(0, 6).map(p => (
-                      <div key={p.id} className="flex items-center gap-3 px-5 py-3 hover:bg-[#CBA052]/3 transition-colors group">
-                        <div className="relative flex-shrink-0">
+                      <div key={p.id} className="flex items-center gap-2 px-4 py-2 hover:bg-[#CBA052]/3 transition-colors">
+                        <div className="flex-shrink-0">
                           {p.photoUrl ? (
-                            <img src={p.photoUrl} alt={p.employeeName} className="w-10 h-10 rounded-xl object-cover ring-1 ring-[#CBA052]/20 group-hover:ring-[#CBA052]/50 transition-all"/>
+                            <img src={p.photoUrl} alt={p.employeeName} className="w-7 h-7 rounded-lg object-cover ring-1 ring-[#CBA052]/20"/>
                           ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#CBA052] to-[#a07d3a] flex items-center justify-center text-white font-black text-sm shadow-sm">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#CBA052] to-[#a07d3a] flex items-center justify-center text-white font-black text-[10px]">
                               {p.employeeName.charAt(0)}
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-bold text-sm text-[#25282A] truncate">{p.employeeName}</p>
-                            <span className="text-[10px] text-slate-400 flex-shrink-0">{p.date}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[11px] text-slate-400 truncate max-w-[100px]">{p.previousPosition || '—'}</span>
-                            <ArrowRight size={10} className="text-[#CBA052] flex-shrink-0" />
-                            <span className="text-[11px] font-bold text-[#1D3C34] truncate max-w-[100px]">{p.newPosition}</span>
+                          <p className="font-bold text-[11px] text-[#25282A] truncate">{p.employeeName}</p>
+                          <div className="flex items-center gap-1">
+                            <span className="text-[9px] text-slate-400 truncate">{p.previousPosition || '—'}</span>
+                            <ArrowRight size={8} className="text-[#CBA052] flex-shrink-0" />
+                            <span className="text-[9px] font-bold text-[#1D3C34] truncate">{p.newPosition}</span>
                           </div>
                         </div>
-                        <span className="text-[10px] text-[#CBA052] font-semibold flex-shrink-0">{p.department}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* New Hires Card */}
-              {hasHires && (
-                <div className="relative overflow-hidden rounded-2xl bg-white border border-[#1D3C34]/10 shadow-md hover:shadow-lg transition-all">
-                  {/* Header bar */}
-                  <div className="flex items-center gap-2.5 px-5 py-3 bg-gradient-to-r from-[#1D3C34]/5 via-transparent to-transparent border-b border-[#1D3C34]/8">
+              {/* New Hires */}
+              {recentHires.length > 0 && (
+                <div className="relative overflow-hidden rounded-2xl bg-white border border-[#1D3C34]/10 shadow-md hover:shadow-lg transition-all group">
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#1D3C34]/5 via-transparent to-transparent border-b border-[#1D3C34]/8">
                     <div className="p-1.5 bg-gradient-to-br from-[#1D3C34] to-[#25282A] rounded-lg text-white shadow-sm shadow-[#1D3C34]/25">
-                      <Users size={14} />
+                      <Users size={12} />
                     </div>
-                    <h3 className="font-black text-[#25282A] text-sm">Nuevos Ingresos</h3>
-                    <span className="ml-auto px-2 py-0.5 bg-[#1D3C34]/10 text-[#1D3C34] text-[10px] font-black rounded-full">{recentHires.length}</span>
+                    <h3 className="font-black text-[#25282A] text-xs">Nuevos Ingresos</h3>
+                    <span className="ml-auto px-1.5 py-0.5 bg-[#1D3C34]/10 text-[#1D3C34] text-[9px] font-black rounded-full">{recentHires.length}</span>
                   </div>
-                  {/* List */}
-                  <div className="divide-y divide-slate-100 max-h-[220px] overflow-y-auto" style={{scrollbarWidth: 'thin'}}>
+                  <div className="divide-y divide-slate-50 max-h-[140px] overflow-y-auto" style={{scrollbarWidth: 'thin'}}>
                     {recentHires.slice(0, 6).map(nh => (
-                      <div key={nh.id} className="flex items-center gap-3 px-5 py-3 hover:bg-[#1D3C34]/3 transition-colors group">
-                        <div className="relative flex-shrink-0">
+                      <div key={nh.id} className="flex items-center gap-2 px-4 py-2 hover:bg-[#1D3C34]/3 transition-colors">
+                        <div className="flex-shrink-0">
                           {nh.photoUrl ? (
-                            <img src={nh.photoUrl} alt={nh.employeeName} className="w-10 h-10 rounded-xl object-cover ring-1 ring-[#1D3C34]/20 group-hover:ring-[#1D3C34]/50 transition-all"/>
+                            <img src={nh.photoUrl} alt={nh.employeeName} className="w-7 h-7 rounded-lg object-cover ring-1 ring-[#1D3C34]/20"/>
                           ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-black text-sm shadow-sm">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#1D3C34] to-[#0f2219] flex items-center justify-center text-white font-black text-[10px]">
                               {nh.employeeName.charAt(0)}
                             </div>
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-bold text-sm text-[#25282A] truncate">{nh.employeeName}</p>
-                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-[#1D3C34]/8 text-[#1D3C34] text-[8px] font-black uppercase tracking-wider rounded-full flex-shrink-0">👋 Nuevo</span>
+                          <div className="flex items-center gap-1">
+                            <p className="font-bold text-[11px] text-[#25282A] truncate">{nh.employeeName}</p>
+                            <span className="px-1 py-0 bg-[#1D3C34]/8 text-[#1D3C34] text-[7px] font-black uppercase rounded flex-shrink-0">👋</span>
                           </div>
-                          <p className="text-[11px] font-semibold text-[#1D3C34] truncate mt-0.5">{nh.position || 'Sin asignar'}</p>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <span className="text-[10px] text-[#1D3C34]/60 font-semibold">{nh.department}</span>
-                          <p className="text-[10px] text-slate-400">{nh.date}</p>
+                          <p className="text-[9px] font-semibold text-[#1D3C34] truncate">{nh.position || 'Sin asignar'} · {nh.department}</p>
                         </div>
                       </div>
                     ))}

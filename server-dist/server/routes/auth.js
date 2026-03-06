@@ -38,7 +38,7 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
     try {
-        const { name, email, password, identificationId, position, department } = req.body;
+        const { name, email, password, identificationId, position, department, avatar } = req.body;
         if (!name || !email || !password) {
             res.status(400).json({ error: 'Nombre, email y contraseña requeridos' });
             return;
@@ -48,6 +48,7 @@ router.post('/register', async (req, res) => {
             res.status(409).json({ error: 'El email ya está registrado' });
             return;
         }
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1D3C34&color=fff`;
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
             data: {
@@ -59,6 +60,7 @@ router.post('/register', async (req, res) => {
                 approved: false,
                 position: position || 'Sin asignar',
                 department: department || 'Sin asignar',
+                avatar: avatar || defaultAvatar,
             },
         });
         const { password: _, ...userWithoutPassword } = user;

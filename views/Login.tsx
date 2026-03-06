@@ -5,7 +5,7 @@ import { odooApi } from '../services/odooApi';
 
 interface LoginProps {
   onLogin: (email: string, pass: string) => Promise<boolean>;
-  onRegister: (data: { name: string; email: string; password: string; identificationId: string; odooEmployeeId: number; position: string; department: string }) => Promise<boolean>;
+  onRegister: (data: { name: string; email: string; password: string; identificationId: string; odooEmployeeId: number; position: string; department: string; avatar?: string }) => Promise<boolean>;
   onBack: () => void;
 }
 
@@ -100,6 +100,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
         odooEmployeeId: verifiedEmployee.id,
         position: verifiedEmployee.job_title || 'Empleado',
         department: verifiedEmployee.department || '',
+        avatar: verifiedEmployee.photo_url || '',
       });
 
       if (success) {

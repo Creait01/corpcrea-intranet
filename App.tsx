@@ -194,7 +194,7 @@ const App: React.FC = () => {
   };
 
   // Register new user (real API with approval flow)
-  const register = async (regData: { name: string; email: string; password: string; identificationId: string; odooEmployeeId: number; position: string; department: string }): Promise<boolean> => {
+  const register = async (regData: { name: string; email: string; password: string; identificationId: string; odooEmployeeId: number; position: string; department: string; avatar?: string }): Promise<boolean> => {
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -206,6 +206,7 @@ const App: React.FC = () => {
           identificationId: regData.identificationId,
           position: regData.position,
           department: regData.department,
+          avatar: regData.avatar,
         }),
       });
       if (res.ok) {

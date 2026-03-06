@@ -260,6 +260,25 @@ router.post('/new-hires', authMiddleware, requireRole('CEO', 'MANAGER', 'HR'), a
         photoUrl: photoUrl || null,
       },
     });
+
+    // Send notification to all users
+    try {
+      const allUsers = await prisma.user.findMany({ select: { id: true } });
+      if (allUsers.length > 0) {
+        await prisma.notification.createMany({
+          data: allUsers.map(u => ({
+            userId: u.id,
+            title: '👋 Nuevo Ingreso',
+            message: `¡Bienvenido/a ${employeeName}! Se une como ${position || 'nuevo integrante'}${department ? ' en ' + department : ''}.`,
+            date: new Date().toISOString().split('T')[0],
+            type: 'SUCCESS' as const,
+          })),
+        });
+      }
+    } catch (notifErr) {
+      console.error('Error creating new-hire notifications:', notifErr);
+    }
+
     res.status(201).json(hire);
   } catch (err) {
     console.error(err);
@@ -343,6 +362,25 @@ router.post('/promotions', authMiddleware, requireRole('CEO', 'MANAGER', 'HR'), 
         photoUrl: photoUrl || null,
       },
     });
+
+    // Send notification to all users
+    try {
+      const allUsers = await prisma.user.findMany({ select: { id: true } });
+      if (allUsers.length > 0) {
+        await prisma.notification.createMany({
+          data: allUsers.map(u => ({
+            userId: u.id,
+            title: '🎉 Nuevo Ascenso',
+            message: `¡Felicidades a ${employeeName}! Ha sido promovido/a a ${newPosition}${department ? ' en ' + department : ''}.`,
+            date: new Date().toISOString().split('T')[0],
+            type: 'SUCCESS' as const,
+          })),
+        });
+      }
+    } catch (notifErr) {
+      console.error('Error creating promotion notifications:', notifErr);
+    }
+
     res.status(201).json(promo);
   } catch (err) {
     console.error(err);

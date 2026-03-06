@@ -20,6 +20,24 @@ router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'
         const item = await prisma.eventItem.create({
             data: { title, date, location: location || '', description: description || '', imageUrl: imageUrl || null, videoUrl: videoUrl || null },
         });
+        // Send notification to all users
+        try {
+            const allUsers = await prisma.user.findMany({ select: { id: true } });
+            if (allUsers.length > 0) {
+                await prisma.notification.createMany({
+                    data: allUsers.map(u => ({
+                        userId: u.id,
+                        title: '📅 Nuevo Evento',
+                        message: `Se ha programado: ${title} — ${date}${location ? ' en ' + location : ''}`,
+                        date: new Date().toISOString().split('T')[0],
+                        type: 'INFO',
+                    })),
+                });
+            }
+        }
+        catch (notifErr) {
+            console.error('Error creating event notifications:', notifErr);
+        }
         res.status(201).json(item);
     }
     catch (err) {

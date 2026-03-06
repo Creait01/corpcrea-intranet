@@ -212,28 +212,25 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
             <p className="text-slate-500 mt-4 text-lg">Mantente al día con la agenda corporativa</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {data.events.map((event, idx) => (
-              <div key={event.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group hover:-translate-y-1" style={{ animationDelay: `${idx * 100}ms` }}>
-                {event.imageUrl && (
-                  <div className="relative h-48 overflow-hidden">
-                    <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-                    <span className="absolute top-3 right-3 text-sm font-bold text-white bg-[#CBA052] px-3 py-1 rounded-full shadow-lg">{event.date}</span>
+              <div key={event.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group hover:-translate-y-1 flex flex-col" style={{ animationDelay: `${idx * 100}ms` }}>
+                {event.imageUrl ? (
+                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-100">
+                    <img src={event.imageUrl} alt={event.title} className="w-full h-full object-contain bg-white group-hover:scale-[1.02] transition-transform duration-500" />
+                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    <span className="absolute top-3 right-3 text-xs font-bold text-white bg-[#CBA052] px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">{event.date}</span>
+                  </div>
+                ) : (
+                  <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-[#1D3C34] to-[#25282A] flex flex-col items-center justify-center p-8">
+                    <Calendar size={48} className="text-[#CBA052]/60 mb-3" />
+                    <span className="text-sm font-bold text-white/80 bg-white/10 px-4 py-1.5 rounded-full backdrop-blur-sm">{event.date}</span>
                   </div>
                 )}
-                <div className="p-6">
-                  {!event.imageUrl && (
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-[#1D3C34]/10 text-[#1D3C34] p-3 rounded-xl group-hover:bg-[#1D3C34] group-hover:text-white transition-colors duration-300">
-                        <Calendar size={24} />
-                      </div>
-                      <span className="text-sm font-bold text-[#CBA052] bg-[#CBA052]/10 px-3 py-1 rounded-full">{event.date}</span>
-                    </div>
-                  )}
-                  <h3 className="text-xl font-black text-[#25282A] mb-2 group-hover:text-[#1D3C34] transition-colors">{event.title}</h3>
-                  <p className="text-slate-500 text-sm mb-5 leading-relaxed">{event.description}</p>
-                  <div className="flex items-center justify-between">
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="text-lg font-black text-[#25282A] mb-2 group-hover:text-[#1D3C34] transition-colors leading-tight">{event.title}</h3>
+                  <p className="text-slate-500 text-sm mb-4 leading-relaxed flex-1">{event.description}</p>
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                     <div className="flex items-center text-sm text-slate-500">
                       <div className="w-2 h-2 rounded-full bg-[#CBA052] mr-2 animate-pulse"></div>
                       {event.location}

@@ -784,6 +784,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
               )}
             </div>
 
+            {/* Upcoming Events */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><CalendarDays className="text-blue-600" size={20}/> Próximos Eventos</h3>
+              {data.events && data.events.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {data.events.slice(0, 6).map(ev => (
+                    <div key={ev.id} className="group rounded-xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 flex flex-col">
+                      {ev.imageUrl ? (
+                        <div className="relative w-full aspect-[4/3] overflow-hidden bg-slate-50">
+                          <img src={ev.imageUrl} alt={ev.title} className="w-full h-full object-contain bg-white group-hover:scale-[1.02] transition-transform duration-300" />
+                          <span className="absolute top-2 right-2 text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">{ev.date}</span>
+                        </div>
+                      ) : (
+                        <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-[#1D3C34] to-[#25282A] flex flex-col items-center justify-center">
+                          <Calendar size={32} className="text-[#CBA052]/60 mb-2" />
+                          <span className="text-[10px] font-bold text-white/80 bg-white/10 px-3 py-1 rounded-full">{ev.date}</span>
+                        </div>
+                      )}
+                      <div className="p-3 flex flex-col flex-1">
+                        <h4 className="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition-colors leading-tight mb-1">{ev.title}</h4>
+                        <p className="text-xs text-slate-500 line-clamp-2 flex-1">{ev.description}</p>
+                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50">
+                          <span className="text-[10px] text-slate-400 flex items-center gap-1"><Calendar size={10}/> {ev.location}</span>
+                          {ev.videoUrl && (
+                            <a href={ev.videoUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-semibold text-blue-600 hover:underline">▶ Video</a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <CalendarDays size={36} className="mx-auto mb-3 text-slate-200"/>
+                  <p className="text-sm text-slate-400 italic">No hay eventos próximos.</p>
+                </div>
+              )}
+            </div>
+
             {/* Promotions & New Hires Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Promotions (visible 15 days) */}

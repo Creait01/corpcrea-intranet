@@ -38,7 +38,7 @@ async function configureCloudinary(): Promise<{ configured: boolean; cloudName: 
 }
 
 // GET /api/upload/cloudinary-config  — return public config (cloud_name + upload_preset) for frontend unsigned uploads
-router.get('/cloudinary-config', async (_req, res) => {
+router.get('/cloudinary-config', authMiddleware, async (_req, res) => {
   try {
     const keys = ['cloudinary_cloud_name', 'cloudinary_upload_preset'];
     const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });

@@ -141,63 +141,19 @@ const App: React.FC = () => {
   }, []);
 
   // Actions
-  const addNews = async (item: NewsItem) => {
-    try {
-      const token = localStorage.getItem('token') || '';
-      const res = await fetch('/api/news', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(item),
-      });
-      if (res.ok) {
-        const saved = await res.json();
-        setData(prev => ({ ...prev, news: [saved, ...prev.news] }));
-      } else {
-        setData(prev => ({ ...prev, news: [item, ...prev.news] }));
-      }
-    } catch {
-      setData(prev => ({ ...prev, news: [item, ...prev.news] }));
-    }
+  const addNews = (item: NewsItem) => {
+    setData(prev => ({ ...prev, news: [item, ...prev.news] }));
   };
 
-  const deleteNews = async (id: string) => {
-    try {
-      const token = localStorage.getItem('token') || '';
-      await fetch(`/api/news/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-    } catch {}
+  const deleteNews = (id: string) => {
     setData(prev => ({ ...prev, news: prev.news.filter(n => n.id !== id) }));
   };
 
-  const addEvent = async (item: EventItem) => {
-    try {
-      const token = localStorage.getItem('token') || '';
-      const res = await fetch('/api/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(item),
-      });
-      if (res.ok) {
-        const saved = await res.json();
-        setData(prev => ({ ...prev, events: [...prev.events, saved] }));
-      } else {
-        setData(prev => ({ ...prev, events: [...prev.events, item] }));
-      }
-    } catch {
-      setData(prev => ({ ...prev, events: [...prev.events, item] }));
-    }
+  const addEvent = (item: EventItem) => {
+    setData(prev => ({ ...prev, events: [...prev.events, item] }));
   };
 
-  const deleteEvent = async (id: string) => {
-    try {
-      const token = localStorage.getItem('token') || '';
-      await fetch(`/api/events/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-    } catch {}
+  const deleteEvent = (id: string) => {
     setData(prev => ({ ...prev, events: prev.events.filter(e => e.id !== id) }));
   };
 

@@ -271,33 +271,91 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
     }
   };
 
-  const handleAddNews = () => {
+  const handleAddNews = async () => {
     if (newNews.title && newNews.description && newNews.imageUrl) {
-      actions.addNews({
-        id: Date.now().toString(),
-        imageUrl: newNews.imageUrl!,
-        title: newNews.title!,
-        description: newNews.description!,
-        date: newNews.date || new Date().toISOString().split('T')[0]
-      });
-      setNewNews({ title: '', description: '', imageUrl: '', date: '' });
+      try {
+        const res = await fetch('/api/news', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify({
+            title: newNews.title,
+            description: newNews.description,
+            imageUrl: newNews.imageUrl,
+            date: newNews.date || new Date().toISOString().split('T')[0],
+          }),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          actions.addNews(created);
+          setNewNews({ title: '', description: '', imageUrl: '', date: '' });
+        } else {
+          alert('Error al publicar la noticia. Verifica tu sesión.');
+        }
+      } catch (err) {
+        console.error('Error adding news:', err);
+        alert('Error de conexión al crear la noticia.');
+      }
     } else {
         alert("Por favor completa el título, la descripción y sube una imagen.");
     }
   };
 
-  const handleAddEvent = () => {
-    if (newEvent.title && newEvent.date) {
-      actions.addEvent({
-        id: Date.now().toString(),
-        title: newEvent.title!,
-        description: newEvent.description || '',
-        location: newEvent.location || 'Oficinas Centrales',
-        date: newEvent.date!,
-        imageUrl: newEvent.imageUrl || undefined,
-        videoUrl: newEvent.videoUrl || undefined
+  const handleDeleteNews = async (id: string) => {
+    try {
+      const res = await fetch(`/api/news/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
       });
-      setNewEvent({ title: '', description: '', location: '', date: '' });
+      if (res.ok) actions.deleteNews(id);
+    } catch (err) {
+      console.error('Error deleting news:', err);
+    }
+  };
+
+  const handleAddEvent = async () => {
+    if (newEvent.title && newEvent.date) {
+      try {
+        const res = await fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify({
+            title: newEvent.title,
+            date: newEvent.date,
+            description: newEvent.description || '',
+            location: newEvent.location || 'Oficinas Centrales',
+            imageUrl: newEvent.imageUrl || null,
+            videoUrl: newEvent.videoUrl || null,
+          }),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          actions.addEvent(created);
+          setNewEvent({ title: '', description: '', location: '', date: '' });
+        } else {
+          alert('Error al crear el evento. Verifica tu sesión.');
+        }
+      } catch (err) {
+        console.error('Error adding event:', err);
+        alert('Error de conexión al crear el evento.');
+      }
+    }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      const res = await fetch(`/api/events/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) actions.deleteEvent(id);
+    } catch (err) {
+      console.error('Error deleting event:', err);
     }
   };
 
@@ -755,7 +813,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                         <h4 className="font-bold text-slate-800 truncate">{item.title}</h4>
                         <p className="text-sm text-slate-500 truncate">{item.date} — {item.description}</p>
                         </div>
-                        <button onClick={() => actions.deleteNews(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <button onClick={() => handleDeleteNews(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                             <Trash2 size={18} />
                         </button>
                     </div>
@@ -852,7 +910,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                             )}
                         </div>
                         </div>
-                        <button onClick={() => actions.deleteEvent(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <button onClick={() => handleDeleteEvent(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 size={18} />
                         </button>
                     </div>

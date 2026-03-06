@@ -778,15 +778,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">URL de Video (opcional)</label>
-                      <input 
-                        placeholder="https://youtube.com/... o URL de video" 
-                        className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
-                        value={newNews.videoUrl || ''}
-                        onChange={e => setNewNews({...newNews, videoUrl: e.target.value})}
-                      />
-                    </div>
+                    <CloudinaryUpload 
+                        label="Video (opcional — sube desde tu PC)"
+                        accept="video/*"
+                        folder="corpocrea/news"
+                        currentUrl={newNews.videoUrl || ''}
+                        onUpload={(result) => setNewNews({...newNews, videoUrl: result.url})}
+                        maxSizeMB={100}
+                        variant="compact"
+                    />
                   </div>
 
                   {/* Center Column: Cover Image */}
@@ -922,6 +922,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                         folder="corpocrea/events"
                         currentUrl={newEvent.videoUrl || ''}
                         onUpload={(result) => setNewEvent({...newEvent, videoUrl: result.url})}
+                        maxSizeMB={100}
                     />
                   </div>
                 </div>

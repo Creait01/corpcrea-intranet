@@ -9,7 +9,7 @@ const router = Router();
 // Multer — store in memory for direct Cloudinary stream upload
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB max
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB max (videos)
 });
 
 // Helper: configure Cloudinary from DB settings at request time

@@ -524,14 +524,18 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-3 py-1 bg-[#CBA052]/10 text-[#CBA052] text-xs font-black rounded-full">{selectedNews.date}</span>
-                  {selectedNews.videoUrl && (
-                    <a href={selectedNews.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full hover:bg-red-100 transition-colors">
-                      <Play size={12}/> Ver Video
-                    </a>
-                  )}
                 </div>
                 <h2 className="text-2xl md:text-3xl font-black text-[#25282A] mb-4 leading-tight">{selectedNews.title}</h2>
-                <p className="text-slate-600 leading-relaxed whitespace-pre-line">{selectedNews.description}</p>
+                <p className="text-slate-600 leading-relaxed whitespace-pre-line mb-6">{selectedNews.description}</p>
+                {selectedNews.videoUrl && (
+                  selectedNews.videoUrl.match(/\.(mp4|webm|ogg|mov)/i) || selectedNews.videoUrl.includes('cloudinary.com/') ? (
+                    <video src={selectedNews.videoUrl} controls className="w-full rounded-xl bg-black max-h-[400px]" />
+                  ) : (
+                    <a href={selectedNews.videoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors">
+                      <Play size={16}/> Ver Video
+                    </a>
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -555,14 +559,18 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
                 {selectedEvent.location && (
                   <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">{selectedEvent.location}</span>
                 )}
-                {selectedEvent.videoUrl && (
-                  <a href={selectedEvent.videoUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 text-xs font-bold rounded-full hover:bg-red-100 transition-colors">
-                    <Play size={12}/> Ver Video
-                  </a>
-                )}
               </div>
               <h2 className="text-2xl md:text-3xl font-black text-[#25282A] mb-4 leading-tight">{selectedEvent.title}</h2>
-              <p className="text-slate-600 leading-relaxed whitespace-pre-line">{selectedEvent.description}</p>
+              <p className="text-slate-600 leading-relaxed whitespace-pre-line mb-6">{selectedEvent.description}</p>
+              {selectedEvent.videoUrl && (
+                selectedEvent.videoUrl.match(/\.(mp4|webm|ogg|mov)/i) || selectedEvent.videoUrl.includes('cloudinary.com/') ? (
+                  <video src={selectedEvent.videoUrl} controls className="w-full rounded-xl bg-black max-h-[400px]" />
+                ) : (
+                  <a href={selectedEvent.videoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors">
+                    <Play size={16}/> Ver Video
+                  </a>
+                )
+              )}
             </div>
           </div>
         </div>

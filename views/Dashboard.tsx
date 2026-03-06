@@ -1482,7 +1482,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
       {/* Main Sidebar */}
       <aside className={`fixed md:sticky top-0 h-screen w-64 bg-slate-900 text-white z-30 transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 flex flex-col`}>
         <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-          <span className="text-xl font-bold">CORPO<span className="text-indigo-600">CREA</span></span>
+          {data.siteLogoUrl ? (
+            <img src={data.siteLogoUrl} alt="Corpocrea" className="h-9 object-contain" />
+          ) : (
+            <span className="text-xl font-bold">CORPO<span className="text-indigo-600">CREA</span></span>
+          )}
           <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-400"><X /></button>
         </div>
         

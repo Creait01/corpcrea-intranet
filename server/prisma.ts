@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
@@ -9,13 +11,16 @@ console.log(`🔗 DATABASE_URL ${dbUrl ? 'is set' : 'is NOT set'} (length: ${dbU
 
 if (dbUrl) {
   try {
-    prismaInstance = globalForPrisma.prisma ?? new PrismaClient({
-      log: ['warn', 'error'],
-    });
-    if (process.env.NODE_ENV !== 'production') {
-      globalForPrisma.prisma = prismaInstance;
+    if (!globalForPrisma.prisma) {
+      const pool = new pg.Pool({ connectionString: dbUrl });
+      const adapter = new PrismaPg(pool);
+      globalForPrisma.prisma = new PrismaClient({
+        adapter,
+        log: ['warn', 'error'],
+      });
     }
-    console.log('✅ Prisma client initialized successfully');
+    prismaInstance = globalForPrisma.prisma;
+    console.log('✅ Prisma client initialized successfully with PrismaPg adapter');
   } catch (e) {
     console.error('❌ Could not initialize Prisma client:', e);
   }

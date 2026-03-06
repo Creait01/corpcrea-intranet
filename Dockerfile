@@ -5,9 +5,9 @@ WORKDIR /app
 # Install OpenSSL for Prisma
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-# Copy package files and install dependencies
+# Copy package files and install ALL dependencies (including dev for build tools)
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 # Copy the rest of the application
 COPY . .

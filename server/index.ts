@@ -20,6 +20,7 @@ import notificationsRoutes from './routes/notifications.js';
 import adminRoutes from './routes/admin.js';
 import uploadRoutes from './routes/upload.js';
 import odooProxyRoutes from './routes/odoo-proxy.js';
+import { autoSeed } from './auto-seed.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,6 +62,8 @@ app.get(/^\/(?!api).*/, (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Corpocrea server running on port ${PORT}`);
+  // Auto-seed default users if DB is empty
+  await autoSeed();
 });

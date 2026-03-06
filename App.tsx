@@ -153,6 +153,22 @@ const App: React.FC = () => {
         }
       })
       .catch(err => console.error('[API] Failed to fetch calendar:', err));
+
+    // Fetch departments from API (DB)
+    fetch('/api/admin/departments')
+      .then(r => r.ok ? r.json() : [])
+      .then(departments => {
+        if (departments.length > 0) setData(prev => ({ ...prev, departments }));
+      })
+      .catch(() => {});
+
+    // Fetch documents from API (DB)
+    fetch('/api/documents')
+      .then(r => r.ok ? r.json() : [])
+      .then(documents => {
+        if (documents.length > 0) setData(prev => ({ ...prev, documents }));
+      })
+      .catch(() => {});
   }, []);
 
   // Actions
@@ -172,11 +188,34 @@ const App: React.FC = () => {
     setData(prev => ({ ...prev, events: prev.events.filter(e => e.id !== id) }));
   };
 
-  const addDocument = (item: DocumentItem) => {
-    setData(prev => ({ ...prev, documents: [item, ...prev.documents] }));
+  const addDocument = async (item: DocumentItem) => {
+    try {
+      const token = localStorage.getItem('token') || '';
+      const res = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name: item.name, category: item.category, size: item.size, uploadDate: item.uploadDate, department: item.department || null, url: item.url || null }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setData(prev => ({ ...prev, documents: [created, ...prev.documents] }));
+      } else {
+        // Fallback to local
+        setData(prev => ({ ...prev, documents: [item, ...prev.documents] }));
+      }
+    } catch {
+      setData(prev => ({ ...prev, documents: [item, ...prev.documents] }));
+    }
   };
 
-  const deleteDocument = (id: string) => {
+  const deleteDocument = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token') || '';
+      await fetch(`/api/documents/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+    } catch {}
     setData(prev => ({ ...prev, documents: prev.documents.filter(d => d.id !== id) }));
   };
 
@@ -474,11 +513,33 @@ const App: React.FC = () => {
     }));
   };
 
-  const addDepartment = (dept: any) => {
-    setData(prev => ({ ...prev, departments: [...prev.departments, dept] }));
+  const addDepartment = async (dept: any) => {
+    try {
+      const token = localStorage.getItem('token') || '';
+      const res = await fetch('/api/admin/departments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name: dept.name, description: dept.description || '', managerId: dept.managerId || null }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setData(prev => ({ ...prev, departments: [...prev.departments, created] }));
+      } else {
+        setData(prev => ({ ...prev, departments: [...prev.departments, dept] }));
+      }
+    } catch {
+      setData(prev => ({ ...prev, departments: [...prev.departments, dept] }));
+    }
   };
 
-  const deleteDepartment = (id: string) => {
+  const deleteDepartment = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token') || '';
+      await fetch(`/api/admin/departments/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+    } catch {}
     setData(prev => ({ ...prev, departments: prev.departments.filter(d => d.id !== id) }));
   };
 

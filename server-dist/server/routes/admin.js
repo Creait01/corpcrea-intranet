@@ -91,6 +91,17 @@ router.post('/departments', authMiddleware, requireRole('CEO', 'MANAGER'), async
         res.status(500).json({ error: 'Error interno' });
     }
 });
+// DELETE /api/admin/departments/:id
+router.delete('/departments/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+    try {
+        await prisma.department.delete({ where: { id: String(req.params.id) } });
+        res.json({ success: true });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
 // ================== USERS (admin) ==================
 // GET /api/admin/users (all approved users)
 router.get('/users', authMiddleware, requireRole('CEO', 'MANAGER'), async (_req, res) => {

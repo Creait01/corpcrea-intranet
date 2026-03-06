@@ -25,6 +25,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   // Document Form State
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docCategory, setDocCategory] = useState<DocumentItem['category']>('Policy');
+  const [docDepartment, setDocDepartment] = useState<string>('');
 
   // Department Form State
   const [newDept, setNewDept] = useState<Partial<Department>>({ name: '', description: '' });
@@ -400,6 +401,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
             category: docCategory,
             size: `${sizeMb} MB`,
             uploadDate: new Date().toLocaleDateString(),
+            department: docDepartment || undefined,
             url: URL.createObjectURL(docFile)
         });
         setDocFile(null);
@@ -984,6 +986,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                                     id: Date.now().toString(),
                                     name: result.originalFilename || result.url.split('/').pop() || 'documento',
                                     category: docCategory,
+                                    department: docDepartment || undefined,
                                     size: `${(result.bytes / (1024 * 1024)).toFixed(1)} MB`,
                                     uploadDate: new Date().toLocaleDateString(),
                                     url: result.url,
@@ -1005,6 +1008,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                                 <option value="Manual">Manual</option>
                                 <option value="Template">Plantilla</option>
                                 <option value="Brand">Marca / Branding</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Departamento</label>
+                            <select 
+                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                value={docDepartment}
+                                onChange={(e) => setDocDepartment(e.target.value)}
+                            >
+                                <option value="">General (sin departamento)</option>
+                                {(data.departments || []).map(dept => (
+                                    <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                ))}
                             </select>
                         </div>
                         

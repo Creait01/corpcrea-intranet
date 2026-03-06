@@ -14,7 +14,7 @@ router.get('/', async (_req, res) => {
     }
 });
 // POST /api/documents
-router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         const doc = await prisma.documentItem.create({ data: req.body });
         res.status(201).json(doc);
@@ -25,7 +25,7 @@ router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res)
     }
 });
 // DELETE /api/documents/:id
-router.delete('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.delete('/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         await prisma.documentItem.delete({ where: { id: String(req.params.id) } });
         res.json({ success: true });

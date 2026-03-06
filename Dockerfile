@@ -4,17 +4,15 @@ WORKDIR /app
 
 COPY . .
 
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+# Dummy URL only for prisma generate at build time (ARG does NOT persist at runtime)
+ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 RUN npm ci
 RUN npx prisma generate
 RUN npm run build
 RUN npx tsc -p server/tsconfig.json
 
-# Unset dummy URL so Railway's real DATABASE_URL is used at runtime
-RUN unset DATABASE_URL
-
 EXPOSE 3000
 
-# Push schema changes to DB then start server
+# At runtime, Railway injects the real DATABASE_URL env var
 CMD npx prisma db push && node server-dist/server/index.js

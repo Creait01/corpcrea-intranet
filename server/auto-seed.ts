@@ -9,6 +9,15 @@ export async function autoSeed() {
   if (!prisma) return;
 
   try {
+    // Always ensure known admin users are approved (fixes migration edge case)
+    await prisma.user.updateMany({
+      where: {
+        email: { in: ['ceo@corpocrea.com', 'admin@corpocrea.com', 'it@corpocrea.com'] },
+        approved: false,
+      },
+      data: { approved: true },
+    }).catch(() => {});
+
     const userCount = await prisma.user.count();
     if (userCount > 0) {
       console.log(`✅ Database has ${userCount} users — skipping auto-seed.`);

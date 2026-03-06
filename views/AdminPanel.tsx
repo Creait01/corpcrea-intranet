@@ -138,15 +138,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   const [cloudSaved, setCloudSaved] = useState(false);
   const [showCloudSecret, setShowCloudSecret] = useState(false);
 
-  // Load Cloudinary settings from backend on mount
+  // Load Cloudinary + Odoo settings from backend on mount
   useEffect(() => {
     fetch('/api/admin/settings', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` } })
       .then(r => r.ok ? r.json() : {})
-      .then(settings => {
+      .then((settings: Record<string, string>) => {
         if (settings.cloudinary_cloud_name) setCloudName(settings.cloudinary_cloud_name);
         if (settings.cloudinary_api_key) setCloudApiKey(settings.cloudinary_api_key);
         if (settings.cloudinary_api_secret) setCloudApiSecret(settings.cloudinary_api_secret);
         if (settings.cloudinary_upload_preset) setCloudUploadPreset(settings.cloudinary_upload_preset);
+        // Load Odoo config from DB (overrides localStorage)
+        if (settings.odoo_url) {
+          setOdooUrl(settings.odoo_url);
+          odooApi.setConfig(settings.odoo_url, settings.odoo_api_key || '');
+        }
+        if (settings.odoo_api_key) setOdooApiKey(settings.odoo_api_key);
       })
       .catch(() => {});
   }, []);
@@ -200,8 +206,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
     }
   };
 
-  const handleSaveOdooSettings = () => {
+  const handleSaveOdooSettings = async () => {
     odooApi.setConfig(odooUrl, odooApiKey);
+    // Also persist to DB so all clients get the same config
+    try {
+      await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({ odoo_url: odooUrl, odoo_api_key: odooApiKey }),
+      });
+    } catch (err) {
+      console.error('Error saving Odoo settings to DB:', err);
+    }
     setOdooSaved(true);
     setTimeout(() => setOdooSaved(false), 3000);
   };

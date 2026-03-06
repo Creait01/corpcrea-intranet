@@ -63,6 +63,9 @@ const App: React.FC = () => {
       cloudinaryService.setToken(savedToken);
     }
 
+    // Load Odoo config from DB so all clients share the same config
+    odooApi.loadFromServer();
+
     fetch('/api/admin/corporate-companies')
       .then(r => r.ok ? r.json() : [])
       .then(companies => setData(prev => ({ ...prev, corporateCompanies: companies })))

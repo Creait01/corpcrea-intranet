@@ -143,6 +143,23 @@ class OdooApiService {
   }
 
   /**
+   * Loads Odoo config from the server-side DB settings.
+   * Call this on app startup so all clients share the same config.
+   */
+  async loadFromServer(): Promise<void> {
+    try {
+      const res = await fetch('/api/admin/settings');
+      if (!res.ok) return;
+      const settings: Record<string, string> = await res.json();
+      if (settings.odoo_url) {
+        this.setConfig(settings.odoo_url, settings.odoo_api_key || '');
+      }
+    } catch {
+      // silent — keep localStorage values as fallback
+    }
+  }
+
+  /**
    * Configura la URL base y API key de Odoo
    */
   setConfig(url: string, apiKey: string) {

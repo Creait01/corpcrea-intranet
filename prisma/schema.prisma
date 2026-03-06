@@ -20,6 +20,7 @@ enum UserRole {
   ARCHITECT
   ENGINEER
   HR
+  CONTENT_MANAGER
 }
 
 model User {
@@ -407,4 +408,23 @@ model Setting {
   value String @default("")
 
   @@map("settings")
+}
+
+// ============================
+// Promotions / Ascensos
+// ============================
+
+model Promotion {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  employeeName  String   @map("employee_name")
+  previousPosition String @default("") @map("previous_position")
+  newPosition   String   @map("new_position")
+  department    String   @default("")
+  date          String
+  description   String   @default("")
+  photoUrl      String?  @map("photo_url")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("promotions")
 }

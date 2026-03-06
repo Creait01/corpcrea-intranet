@@ -14,7 +14,7 @@ router.get('/', async (_req, res) => {
     }
 });
 // POST /api/events
-router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         const { title, date, location, description } = req.body;
         const item = await prisma.eventItem.create({
@@ -28,7 +28,7 @@ router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res)
     }
 });
 // PUT /api/events/:id
-router.put('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         const item = await prisma.eventItem.update({
             where: { id: String(req.params.id) },
@@ -42,7 +42,7 @@ router.put('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, re
     }
 });
 // DELETE /api/events/:id
-router.delete('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.delete('/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         await prisma.eventItem.delete({ where: { id: String(req.params.id) } });
         res.json({ success: true });

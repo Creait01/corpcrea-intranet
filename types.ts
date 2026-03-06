@@ -4,7 +4,8 @@ export enum UserRole {
   CEO = 'CEO', // Chief Executive Officer
   ARCHITECT = 'ARCHITECT',
   ENGINEER = 'ENGINEER',
-  HR = 'HR' // Human Resources
+  HR = 'HR', // Human Resources
+  CONTENT_MANAGER = 'CONTENT_MANAGER' // CMS only: news, events, companies
 }
 
 export interface Loan {
@@ -244,6 +245,18 @@ export interface CorporateCompany {
   sortOrder?: number;
 }
 
+export interface Promotion {
+  id: string;
+  userId: string;
+  employeeName: string;
+  previousPosition: string;
+  newPosition: string;
+  department: string;
+  date: string;
+  description: string;
+  photoUrl?: string;
+}
+
 export interface SocialBenefitsRequest {
   id: string;
   userId: string;
@@ -274,6 +287,7 @@ export interface AppState {
   socialBenefitsRequests: SocialBenefitsRequest[];
   corporateCompanies: CorporateCompany[];
   siteLogoUrl: string;
+  promotions: Promotion[];
 }
 
 export interface AppActions {
@@ -310,4 +324,7 @@ export interface AppActions {
   deleteCorporateCompany: (id: string) => void;
   // Site Settings
   updateSiteLogoUrl: (url: string) => void;
+  // Promotions
+  addPromotion: (promo: Promotion) => void;
+  deletePromotion: (id: string) => void;
 }

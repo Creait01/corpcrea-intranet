@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppState } from '../types';
-import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, Gift, Award, ArrowRight, Menu, X, LogIn, Building2, Users, Globe, Shield, ChevronDown } from 'lucide-react';
 
 interface LandingProps {
   data: AppState;
@@ -11,7 +11,6 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Handle Scroll for Navbar styling
   useEffect(() => {
@@ -36,34 +35,13 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
   
   const birthdays = data.employees.filter(e => {
     const m = parseInt(e.birthDate.split('-')[0]);
-    return m === 6;
+    return m === currentMonth;
   });
 
   const anniversaries = data.employees.filter(e => {
     const startMonth = parseInt(e.startDate.split('-')[1]);
-    return startMonth === 6;
+    return startMonth === currentMonth;
   });
-
-  // Company carousel auto-scroll
-  useEffect(() => {
-    if (!data.corporateCompanies || data.corporateCompanies.length <= 3) return;
-    const el = carouselRef.current;
-    if (!el) return;
-    const interval = setInterval(() => {
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-        el.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        el.scrollBy({ left: 220, behavior: 'smooth' });
-      }
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [data.corporateCompanies]);
-
-  const scrollCarousel = (dir: 'left' | 'right') => {
-    const el = carouselRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir === 'left' ? -220 : 220, behavior: 'smooth' });
-  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-800">
@@ -182,35 +160,39 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
           <div className="bg-white rounded-2xl shadow-2xl shadow-slate-900/10 p-6 md:p-8 border border-slate-100">
             {data.corporateCompanies && data.corporateCompanies.length > 0 ? (
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-5">Empresas de la Corporación</p>
-                <div className="relative">
-                  {data.corporateCompanies.length > 3 && (
-                    <button onClick={() => scrollCarousel('left')} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 bg-white shadow-lg border border-slate-200 rounded-full p-1.5 hover:bg-slate-50 transition-colors hidden md:flex">
-                      <ChevronLeft size={18} className="text-slate-600"/>
-                    </button>
-                  )}
-                  <div ref={carouselRef} className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth py-2 px-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {data.corporateCompanies.map((company) => (
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-6">Empresas de la Corporación</p>
+                <div className="relative overflow-hidden">
+                  {/* Gradient masks */}
+                  <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+                  <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+                  
+                  {/* Infinite scroll track */}
+                  <div className="flex items-center gap-12 animate-marquee hover:[animation-play-state:paused]" style={{
+                    animation: `marquee ${Math.max(20, data.corporateCompanies.length * 5)}s linear infinite`,
+                    width: 'max-content'
+                  }}>
+                    {/* Duplicate items for seamless loop */}
+                    {[...data.corporateCompanies, ...data.corporateCompanies, ...data.corporateCompanies].map((company, idx) => (
                       <a
-                        key={company.id}
+                        key={`${company.id}-${idx}`}
                         href={company.website || '#'}
                         target={company.website ? '_blank' : undefined}
                         rel="noopener noreferrer"
-                        className="flex-shrink-0 flex flex-col items-center gap-2 group min-w-[140px]"
+                        className="flex-shrink-0 group"
                       >
-                        <div className="w-24 h-16 md:w-28 md:h-20 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-100 group-hover:border-[#CBA052]/30 group-hover:shadow-md transition-all p-2">
-                          <img src={company.logoUrl} alt={company.name} className="max-w-full max-h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-36 h-24 md:w-44 md:h-28 flex items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm group-hover:shadow-xl group-hover:border-[#CBA052]/40 group-hover:scale-105 transition-all duration-300 p-4">
+                          <img src={company.logoUrl} alt={company.name} className="max-w-full max-h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
                         </div>
-                        <span className="text-[11px] font-semibold text-slate-500 group-hover:text-[#1D3C34] transition-colors text-center leading-tight">{company.name}</span>
                       </a>
                     ))}
                   </div>
-                  {data.corporateCompanies.length > 3 && (
-                    <button onClick={() => scrollCarousel('right')} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 bg-white shadow-lg border border-slate-200 rounded-full p-1.5 hover:bg-slate-50 transition-colors hidden md:flex">
-                      <ChevronRight size={18} className="text-slate-600"/>
-                    </button>
-                  )}
                 </div>
+                <style>{`
+                  @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-33.333%); }
+                  }
+                `}</style>
               </div>
             ) : (
               <div className="text-center py-2">
@@ -348,6 +330,41 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
 
             </div>
           </div>
+
+          {/* Recent Promotions */}
+          {data.promotions && data.promotions.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-2xl font-black text-[#25282A] text-center mb-8">Ascensos Recientes</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {data.promotions.slice(0, 6).map(p => (
+                  <div key={p.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                    <div className="flex items-center gap-4 mb-4">
+                      {p.photoUrl ? (
+                        <img src={p.photoUrl} alt={p.employeeName} className="w-14 h-14 rounded-full object-cover ring-2 ring-[#CBA052]/40 group-hover:ring-[#CBA052] transition-all"/>
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#CBA052] to-[#a07d3a] flex items-center justify-center text-white font-bold text-xl">
+                          {p.employeeName.charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-black text-[#25282A]">{p.employeeName}</h4>
+                        <p className="text-xs text-slate-400">{p.department}</p>
+                      </div>
+                    </div>
+                    <div className="bg-[#1D3C34]/5 rounded-xl p-3 mb-3">
+                      <p className="text-xs text-slate-500">Cargo anterior</p>
+                      <p className="text-sm font-medium text-slate-700">{p.previousPosition || '—'}</p>
+                    </div>
+                    <div className="bg-[#CBA052]/10 rounded-xl p-3">
+                      <p className="text-xs text-[#CBA052]">Nuevo cargo</p>
+                      <p className="text-sm font-bold text-[#1D3C34]">{p.newPosition}</p>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-3 text-right">{p.date}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

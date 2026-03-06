@@ -7,9 +7,10 @@ interface LoginProps {
   onLogin: (email: string, pass: string) => Promise<boolean>;
   onRegister: (data: { name: string; email: string; password: string; identificationId: string; odooEmployeeId: number; position: string; department: string; avatar?: string }) => Promise<boolean>;
   onBack: () => void;
+  siteLogoUrl?: string;
 }
 
-export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => {
+export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack, siteLogoUrl }) => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   
   // Login state
@@ -130,11 +131,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#25282A] via-[#1D3C34] to-[#25282A]">
         <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#CBA052] rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/4 w-96 h-96 bg-[#1D3C34] rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-[#A2B2C8] rounded-full mix-blend-multiply filter blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
         </div>
         {/* Grid overlay */}
         <div className="absolute inset-0 opacity-5" style={{
@@ -146,14 +147,20 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onRegister, onBack }) => 
       <div className="relative z-10 w-full max-w-md mx-4">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <span className="text-white font-black text-xl">C</span>
+          {siteLogoUrl ? (
+            <div className="mb-3">
+              <img src={siteLogoUrl} alt="Corpocrea" className="h-16 mx-auto object-contain drop-shadow-lg" />
             </div>
-            <span className="text-3xl font-bold text-white tracking-tight">
-              CORPO<span className="text-blue-400">CREA</span>
-            </span>
-          </div>
+          ) : (
+            <div className="inline-flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#CBA052] to-[#a07d3a] rounded-2xl flex items-center justify-center shadow-lg shadow-[#CBA052]/30">
+                <span className="text-white font-black text-xl">C</span>
+              </div>
+              <span className="text-3xl font-bold text-white tracking-tight">
+                CORPO<span className="text-[#CBA052]">CREA</span>
+              </span>
+            </div>
+          )}
           <p className="text-blue-200/60 text-sm font-medium tracking-wider uppercase">Intranet Corporativa</p>
         </div>
 

@@ -176,6 +176,29 @@ router.put('/users/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (r
     }
 });
 // ================== CORPORATE COMPANIES ==================
+// GET /api/admin/new-hires (recently approved users — last 30 days)
+router.get('/new-hires', authMiddleware, async (_req, res) => {
+    try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const users = await prisma.user.findMany({
+            where: {
+                approved: true,
+                createdAt: { gte: thirtyDaysAgo },
+            },
+            select: {
+                id: true, name: true, avatar: true, position: true, department: true, createdAt: true,
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+        });
+        res.json(users);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
 // GET /api/admin/corporate-companies (public for landing)
 router.get('/corporate-companies', async (_req, res) => {
     try {
@@ -188,7 +211,7 @@ router.get('/corporate-companies', async (_req, res) => {
     }
 });
 // POST /api/admin/corporate-companies
-router.post('/corporate-companies', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.post('/corporate-companies', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         const { name, logoUrl, website, sortOrder } = req.body;
         const company = await prisma.corporateCompany.create({
@@ -202,9 +225,55 @@ router.post('/corporate-companies', authMiddleware, requireRole('CEO', 'MANAGER'
     }
 });
 // DELETE /api/admin/corporate-companies/:id
-router.delete('/corporate-companies/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.delete('/corporate-companies/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         await prisma.corporateCompany.delete({ where: { id: String(req.params.id) } });
+        res.json({ success: true });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// ================== PROMOTIONS ==================
+// GET /api/admin/promotions (public for landing/dashboard)
+router.get('/promotions', async (_req, res) => {
+    try {
+        const promotions = await prisma.promotion.findMany({ orderBy: { createdAt: 'desc' } });
+        res.json(promotions);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// POST /api/admin/promotions
+router.post('/promotions', authMiddleware, requireRole('CEO', 'MANAGER', 'HR'), async (req, res) => {
+    try {
+        const { userId, employeeName, previousPosition, newPosition, department, date, description, photoUrl } = req.body;
+        const promo = await prisma.promotion.create({
+            data: {
+                userId: userId || '',
+                employeeName,
+                previousPosition: previousPosition || '',
+                newPosition,
+                department: department || '',
+                date: date || new Date().toISOString().split('T')[0],
+                description: description || '',
+                photoUrl: photoUrl || null,
+            },
+        });
+        res.status(201).json(promo);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error interno' });
+    }
+});
+// DELETE /api/admin/promotions/:id
+router.delete('/promotions/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'HR'), async (req, res) => {
+    try {
+        await prisma.promotion.delete({ where: { id: String(req.params.id) } });
         res.json({ success: true });
     }
     catch (err) {

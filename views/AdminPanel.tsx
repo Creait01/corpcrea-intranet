@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department, CorporateCompany } from '../types';
-import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff, Building2 } from 'lucide-react';
+import { AppState, AppActions, NewsItem, EventItem, UserRole, DocumentItem, Department, CorporateCompany, Promotion } from '../types';
+import { Trash2, Plus, ArrowLeft, Image as ImageIcon, Save, Video, Upload, File, X, Calendar, FileText, Users, Settings, Wifi, WifiOff, Loader2, Database, Shield, CheckCircle, AlertCircle, Globe, Cloud, CloudOff, Eye, EyeOff, Building2, TrendingUp } from 'lucide-react';
 import { odooApi } from '../services/odooApi';
 import { CloudinaryUpload } from '../components/CloudinaryUpload';
 import { cloudinaryService } from '../services/cloudinaryUpload';
@@ -14,7 +14,7 @@ interface AdminPanelProps {
 // Legacy ImageUploadField removed — now using CloudinaryUpload component
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack }) => {
-  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'users' | 'settings'>('news');
+  const [activeSection, setActiveSection] = useState<'news' | 'events' | 'ceo' | 'docs' | 'departments' | 'companies' | 'users' | 'settings' | 'promotions'>('news');
   const user = data.currentUser;
   
   // Local state for forms
@@ -31,9 +31,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   // Corporate Company Form State
   const [newCompany, setNewCompany] = useState<Partial<CorporateCompany>>({ name: '', logoUrl: '', website: '' });
 
+  // Promotion Form State
+  const [newPromo, setNewPromo] = useState<Partial<Promotion>>({ employeeName: '', previousPosition: '', newPosition: '', department: '', date: '', description: '', photoUrl: '' });
+
   // Site Logo State
   const [siteLogoUrl, setSiteLogoUrl] = useState(data.siteLogoUrl || '');
   const [logoSaved, setLogoSaved] = useState(false);
+
+  // Favicon State
+  const [siteFaviconUrl, setSiteFaviconUrl] = useState('');
+  const [faviconSaved, setFaviconSaved] = useState(false);
 
   useEffect(() => { setSiteLogoUrl(data.siteLogoUrl || ''); }, [data.siteLogoUrl]);
 
@@ -147,6 +154,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
         if (settings.cloudinary_api_key) setCloudApiKey(settings.cloudinary_api_key);
         if (settings.cloudinary_api_secret) setCloudApiSecret(settings.cloudinary_api_secret);
         if (settings.cloudinary_upload_preset) setCloudUploadPreset(settings.cloudinary_upload_preset);
+        if (settings.site_favicon_url) setSiteFaviconUrl(settings.site_favicon_url);
         // Load Odoo config from DB (overrides localStorage)
         if (settings.odoo_url) {
           setOdooUrl(settings.odoo_url);
@@ -367,6 +375,40 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
     }
   };
 
+  const handleAddPromotion = async () => {
+    if (newPromo.employeeName && newPromo.newPosition) {
+      try {
+        const res = await fetch('/api/admin/promotions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+          body: JSON.stringify(newPromo),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          actions.addPromotion(created);
+          setNewPromo({ employeeName: '', previousPosition: '', newPosition: '', department: '', date: '', description: '', photoUrl: '' });
+        }
+      } catch (err) {
+        console.error('Error adding promotion:', err);
+      }
+    }
+  };
+
+  const handleDeletePromotion = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/promotions/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` },
+      });
+      if (res.ok) actions.deletePromotion(id);
+    } catch (err) {
+      console.error('Error deleting promotion:', err);
+    }
+  };
+
   const handleSaveSiteLogo = async () => {
     try {
       const res = await fetch('/api/admin/settings', {
@@ -384,6 +426,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
       }
     } catch (err) {
       console.error('Error saving site logo:', err);
+    }
+  };
+
+  const handleSaveFavicon = async () => {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: JSON.stringify({ site_favicon_url: siteFaviconUrl }),
+      });
+      if (res.ok) {
+        // Update live favicon
+        let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+        if (!link) {
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        link.href = siteFaviconUrl;
+        setFaviconSaved(true);
+        setTimeout(() => setFaviconSaved(false), 3000);
+      }
+    } catch (err) {
+      console.error('Error saving favicon:', err);
     }
   };
 
@@ -420,32 +489,42 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
              <Calendar size={18}/> Eventos
           </button>
           <button 
-            onClick={() => setActiveSection('docs')}
-            className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'docs' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
-          >
-             <FileText size={18}/> Documentos
-          </button>
-          <button 
-            onClick={() => setActiveSection('departments')}
-            className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'departments' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
-          >
-             <Users size={18}/> Departamentos
-          </button>
-          <button 
             onClick={() => setActiveSection('companies')}
             className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'companies' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
           >
              <Building2 size={18}/> Empresas del Grupo
           </button>
-          <button 
-            onClick={() => { setActiveSection('users'); fetchPendingUsers(); }}
-            className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'users' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
-          >
-             <Shield size={18}/> Usuarios
-             {pendingUsers.length > 0 && (
-               <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{pendingUsers.length}</span>
-             )}
-          </button>
+          {user?.role !== UserRole.CONTENT_MANAGER && (
+            <>
+              <button 
+                onClick={() => setActiveSection('promotions')}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'promotions' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              >
+                <TrendingUp size={18}/> Ascensos
+              </button>
+              <button 
+                onClick={() => setActiveSection('docs')}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'docs' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              >
+                <FileText size={18}/> Documentos
+              </button>
+              <button 
+                onClick={() => setActiveSection('departments')}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'departments' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              >
+                <Users size={18}/> Departamentos
+              </button>
+              <button 
+                onClick={() => { setActiveSection('users'); fetchPendingUsers(); }}
+                className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'users' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+              >
+                <Shield size={18}/> Usuarios
+                {pendingUsers.length > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">{pendingUsers.length}</span>
+                )}
+              </button>
+            </>
+          )}
           {user?.role === UserRole.CEO && (
              <button 
                onClick={() => setActiveSection('ceo')}
@@ -458,12 +537,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
           {/* Divider */}
           <div className="border-t border-slate-200 my-2"></div>
 
-          <button 
-            onClick={() => setActiveSection('settings')}
-            className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'settings' ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
-          >
-            <Settings size={18}/> Configuración
-          </button>
+          {user?.role !== UserRole.CONTENT_MANAGER && (
+            <button 
+              onClick={() => setActiveSection('settings')}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl font-medium transition-colors ${activeSection === 'settings' ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/30' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+            >
+              <Settings size={18}/> Configuración
+            </button>
+          )}
         </div>
 
         {/* Content Area */}
@@ -958,6 +1039,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                               className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                             >
                               <option value="EMPLOYEE">Empleado</option>
+                              <option value="CONTENT_MANAGER">Gestor de Contenido</option>
                               <option value="MANAGER">Gerente</option>
                               <option value="CEO">CEO</option>
                             </select>
@@ -978,6 +1060,121 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                             <CheckCircle size={16}/> Aprobar
                           </button>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'promotions' && (
+            <div className="space-y-6">
+              {/* Add Promotion */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
+                  <Plus className="text-blue-600" /> Registrar Ascenso
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del Empleado</label>
+                    <input 
+                      placeholder="Ej: María González" 
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={newPromo.employeeName || ''} 
+                      onChange={e => setNewPromo({...newPromo, employeeName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Departamento</label>
+                    <input 
+                      placeholder="Ej: Tecnología" 
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={newPromo.department || ''} 
+                      onChange={e => setNewPromo({...newPromo, department: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Cargo Anterior</label>
+                    <input 
+                      placeholder="Ej: Analista Junior" 
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={newPromo.previousPosition || ''} 
+                      onChange={e => setNewPromo({...newPromo, previousPosition: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Nuevo Cargo</label>
+                    <input 
+                      placeholder="Ej: Coordinador de Proyectos" 
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={newPromo.newPosition || ''} 
+                      onChange={e => setNewPromo({...newPromo, newPosition: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Fecha</label>
+                    <input 
+                      type="date"
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={newPromo.date || ''} 
+                      onChange={e => setNewPromo({...newPromo, date: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Foto (URL)</label>
+                    <input 
+                      placeholder="URL de la foto del empleado" 
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none"
+                      value={newPromo.photoUrl || ''} 
+                      onChange={e => setNewPromo({...newPromo, photoUrl: e.target.value})}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Descripción / Motivo</label>
+                    <textarea 
+                      placeholder="Descripción del ascenso..." 
+                      className="p-3 border border-slate-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                      value={newPromo.description || ''} 
+                      onChange={e => setNewPromo({...newPromo, description: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleAddPromotion} 
+                  disabled={!newPromo.employeeName || !newPromo.newPosition}
+                  className="mt-4 flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <TrendingUp size={18}/> Registrar Ascenso
+                </button>
+              </div>
+
+              {/* Promotions List */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Ascensos Registrados</h3>
+                {data.promotions.length === 0 ? (
+                  <p className="text-sm text-slate-400 italic text-center py-8">No hay ascensos registrados aún.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {data.promotions.map(p => (
+                      <div key={p.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        {p.photoUrl ? (
+                          <img src={p.photoUrl} alt={p.employeeName} className="w-12 h-12 rounded-full object-cover ring-2 ring-[#CBA052]"/>
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#CBA052] to-[#a07d3a] flex items-center justify-center text-white font-bold text-lg">
+                            {p.employeeName.charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-slate-800">{p.employeeName}</h4>
+                          <p className="text-sm text-slate-500">{p.previousPosition} → <span className="text-[#1D3C34] font-semibold">{p.newPosition}</span></p>
+                          <p className="text-xs text-slate-400">{p.department} • {p.date}</p>
+                        </div>
+                        <button onClick={() => handleDeletePromotion(p.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 size={16}/>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -1030,6 +1227,56 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                     >
                       {logoSaved ? <CheckCircle size={18}/> : <Save size={18}/>}
                       {logoSaved ? 'Logo Guardado ✓' : 'Guardar Logo'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Favicon Configuration */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 bg-[#CBA052] text-white rounded-xl">
+                    <Globe size={22}/>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">Favicon del Sitio</h2>
+                    <p className="text-sm text-slate-500">Sube el ícono que aparecerá en la pestaña del navegador. Se recomienda 32×32 o 64×64 px.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <CloudinaryUpload 
+                      label="Favicon (ICO, PNG, SVG)"
+                      accept="image/*,.ico"
+                      folder="corpocrea/branding"
+                      currentUrl={siteFaviconUrl}
+                      onUpload={(result) => setSiteFaviconUrl(result.url)}
+                    />
+                  </div>
+                  <div className="flex flex-col justify-between">
+                    {siteFaviconUrl ? (
+                      <div className="bg-slate-100 rounded-xl p-6 flex items-center justify-center gap-4 mb-4 border border-slate-200">
+                        <img src={siteFaviconUrl} alt="Favicon preview" className="w-8 h-8 object-contain"/>
+                        <div className="bg-white rounded-lg border border-slate-200 px-3 py-1.5 flex items-center gap-2 text-sm text-slate-600">
+                          <img src={siteFaviconUrl} alt="" className="w-4 h-4 object-contain"/>
+                          Corpocrea — Intranet
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-50 rounded-xl p-6 flex items-center justify-center mb-4 border border-dashed border-slate-300">
+                        <div className="text-center text-slate-400">
+                          <Globe size={32} className="mx-auto mb-2 opacity-50"/>
+                          <p className="text-xs">Vista previa del favicon</p>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleSaveFavicon}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20 transition-all"
+                    >
+                      {faviconSaved ? <CheckCircle size={18}/> : <Save size={18}/>}
+                      {faviconSaved ? 'Favicon Guardado ✓' : 'Guardar Favicon'}
                     </button>
                   </div>
                 </div>

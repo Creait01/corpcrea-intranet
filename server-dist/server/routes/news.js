@@ -29,7 +29,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 // POST /api/news  (admin only)
-router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         const { title, description, imageUrl, videoUrl, type } = req.body;
         const item = await prisma.newsItem.create({
@@ -50,7 +50,7 @@ router.post('/', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res)
     }
 });
 // PUT /api/news/:id
-router.put('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.put('/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         const item = await prisma.newsItem.update({
             where: { id: String(req.params.id) },
@@ -64,7 +64,7 @@ router.put('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, re
     }
 });
 // DELETE /api/news/:id
-router.delete('/:id', authMiddleware, requireRole('CEO', 'MANAGER'), async (req, res) => {
+router.delete('/:id', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
         await prisma.newsItem.delete({ where: { id: String(req.params.id) } });
         res.json({ success: true });

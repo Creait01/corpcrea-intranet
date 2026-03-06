@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  AppState, AppActions, UserRole, NewsItem, EventItem, CeoMessageContent, DocumentItem, Task, TaskStatus, SocialBenefitsRequest, OdooDashboardState, CorporateCompany 
+  AppState, AppActions, UserRole, NewsItem, EventItem, CeoMessageContent, DocumentItem, Task, TaskStatus, SocialBenefitsRequest, OdooDashboardState, CorporateCompany, Promotion 
 } from './types';
 import { INITIAL_NEWS, INITIAL_EVENTS, INITIAL_EMPLOYEES, INITIAL_DOCUMENTS, MOCK_USERS, INITIAL_CHANNELS, INITIAL_MESSAGES, INITIAL_CEO_MESSAGE, INITIAL_PROJECTS, INITIAL_TASKS, INITIAL_CALENDAR_EVENTS, INITIAL_VACATION_REQUESTS, INITIAL_TRAININGS, INITIAL_DEPARTMENTS, INITIAL_NOTIFICATIONS, INITIAL_DOCUMENT_REQUESTS, INITIAL_SOCIAL_BENEFITS_REQUESTS } from './data';
 import { Landing } from './views/Landing';
@@ -52,7 +52,8 @@ const App: React.FC = () => {
     documentRequests: INITIAL_DOCUMENT_REQUESTS,
     socialBenefitsRequests: INITIAL_SOCIAL_BENEFITS_REQUESTS,
     corporateCompanies: [],
-    siteLogoUrl: ''
+    siteLogoUrl: '',
+    promotions: []
   });
 
   // Fetch corporate companies and site logo on mount + restore token
@@ -71,6 +72,12 @@ const App: React.FC = () => {
       .then(companies => setData(prev => ({ ...prev, corporateCompanies: companies })))
       .catch(() => {});
 
+    // Fetch promotions
+    fetch('/api/admin/promotions')
+      .then(r => r.ok ? r.json() : [])
+      .then(promotions => setData(prev => ({ ...prev, promotions })))
+      .catch(() => {});
+
     // Settings: use token if available so we get the logo
     const headers: Record<string, string> = {};
     if (savedToken) headers['Authorization'] = `Bearer ${savedToken}`;
@@ -79,6 +86,16 @@ const App: React.FC = () => {
       .then((settings: Record<string, string>) => {
         if (settings.site_logo_url) {
           setData(prev => ({ ...prev, siteLogoUrl: settings.site_logo_url }));
+        }
+        // Dynamic favicon
+        if (settings.site_favicon_url) {
+          let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.head.appendChild(link);
+          }
+          link.href = settings.site_favicon_url;
         }
       })
       .catch(() => {});
@@ -433,6 +450,14 @@ const App: React.FC = () => {
     setData(prev => ({ ...prev, siteLogoUrl: url }));
   };
 
+  const addPromotion = (promo: Promotion) => {
+    setData(prev => ({ ...prev, promotions: [promo, ...prev.promotions] }));
+  };
+
+  const deletePromotion = (id: string) => {
+    setData(prev => ({ ...prev, promotions: prev.promotions.filter(p => p.id !== id) }));
+  };
+
   const actions: AppActions = {
     addNews, deleteNews, addEvent, deleteEvent, login, logout,
     sendMessage, createGroupChannel, createDirectChannel, updateCeoMessage,
@@ -440,7 +465,8 @@ const App: React.FC = () => {
     addCalendarEvent, requestVacation, approveVacation, requestLoan,
     markTrainingComplete, addDepartment, deleteDepartment,
     requestDocument, markNotificationRead, requestSocialBenefits,
-    addCorporateCompany, deleteCorporateCompany, updateSiteLogoUrl
+    addCorporateCompany, deleteCorporateCompany, updateSiteLogoUrl,
+    addPromotion, deletePromotion
   };
 
   // Router / View Switcher logic
@@ -454,7 +480,8 @@ const App: React.FC = () => {
           <Login 
             onLogin={login}
             onRegister={register}
-            onBack={() => setCurrentView('LANDING')} 
+            onBack={() => setCurrentView('LANDING')}
+            siteLogoUrl={data.siteLogoUrl}
           />
         );
       
@@ -491,7 +518,7 @@ const App: React.FC = () => {
         );
 
       case 'ADMIN':
-        if (!data.currentUser || (data.currentUser.role !== UserRole.MANAGER && data.currentUser.role !== UserRole.CEO)) {
+        if (!data.currentUser || (data.currentUser.role !== UserRole.MANAGER && data.currentUser.role !== UserRole.CEO && data.currentUser.role !== UserRole.CONTENT_MANAGER)) {
             setCurrentView('DASHBOARD');
             return null;
         }

@@ -825,8 +825,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.news.map(n => (
                   <div key={n.id} className="group cursor-pointer" onClick={() => { setSelectedNews(n); setNewsGalleryIdx(0); }}>
-                    <div className="h-40 rounded-xl overflow-hidden mb-3">
-                      <img src={n.imageUrl} alt={n.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <div className="h-40 rounded-xl overflow-hidden mb-3 bg-slate-100">
+                      {!n.imageUrl && n.videoUrl ? (
+                        <video src={n.videoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted playsInline onMouseOver={e => (e.target as HTMLVideoElement).play()} onMouseOut={e => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }} />
+                      ) : n.imageUrl ? (
+                        <img src={n.imageUrl} alt={n.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300"><Bell size={32}/></div>
+                      )}
                     </div>
                     <h4 className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">{n.title}</h4>
                     <span className="text-xs text-slate-500">{n.date}</span>

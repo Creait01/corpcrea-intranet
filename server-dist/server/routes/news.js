@@ -40,7 +40,7 @@ router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'
             data: {
                 title,
                 description: description || '',
-                imageUrl,
+                imageUrl: imageUrl || null,
                 additionalImages: additionalImages ? JSON.stringify(additionalImages) : null,
                 videoUrl: videoUrl || null,
                 type: type || 'IMAGE',

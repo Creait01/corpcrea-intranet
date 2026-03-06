@@ -273,7 +273,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
   };
 
   const handleAddNews = async () => {
-    if (newNews.title && newNews.description && newNews.imageUrl) {
+    if (newNews.title && newNews.description && (newNews.imageUrl || newNews.videoUrl)) {
       try {
         const res = await fetch('/api/news', {
           method: 'POST',
@@ -792,16 +792,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                   {/* Center Column: Cover Image */}
                   <div className="space-y-4">
                     <CloudinaryUpload 
-                        label="Imagen de portada (principal)"
+                        label="Imagen de portada (opcional si hay video)"
                         accept="image/*"
                         folder="corpocrea/news"
                         currentUrl={newNews.imageUrl || ''}
                         onUpload={(result) => setNewNews({...newNews, imageUrl: result.url})}
                     />
+                    {!newNews.imageUrl && newNews.videoUrl && (
+                      <p className="text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200">📹 El video será la portada de esta noticia</p>
+                    )}
                     <div className="pt-4">
                         <button 
                             onClick={handleAddNews} 
-                            disabled={!newNews.title || !newNews.imageUrl}
+                            disabled={!newNews.title || !(newNews.imageUrl || newNews.videoUrl)}
                             className="w-full bg-blue-600 disabled:bg-slate-300 text-white px-6 py-3 rounded-xl hover:bg-blue-700 flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg shadow-blue-600/20"
                         >
                         <Save size={20} /> Publicar

@@ -668,7 +668,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
             ))}
             {days.map(day => {
               const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const events = data.calendarEvents?.filter(e => e.date === dateStr) || [];
+              const calEvents = data.calendarEvents?.filter(e => e.date === dateStr) || [];
+              // Merge CMS events into calendar
+              const cmsEvents = (data.events || []).filter(e => e.date === dateStr).map(e => ({
+                id: e.id,
+                title: e.title,
+                date: e.date,
+                type: 'EVENT' as const,
+                isWorkingDay: true,
+                description: e.description,
+              }));
+              const events = [...calEvents, ...cmsEvents];
               const isToday = new Date().toISOString().split('T')[0] === dateStr;
 
               return (
@@ -697,24 +707,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
           <h3 className="font-bold text-lg mb-4 text-slate-800">Próximos Eventos y Feriados</h3>
           <div className="space-y-3">
-            {data.calendarEvents
-              ?.filter(e => new Date(e.date) >= new Date())
-              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-              .slice(0, 5)
-              .map(event => (
+            {(() => {
+              const cmsAsCalendar = (data.events || []).map(e => ({
+                id: e.id,
+                title: e.title,
+                date: e.date,
+                type: 'EVENT' as const,
+                isWorkingDay: true,
+                description: e.description,
+              }));
+              const allUpcoming = [...(data.calendarEvents || []), ...cmsAsCalendar]
+                .filter(e => new Date(e.date) >= new Date())
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                .slice(0, 8);
+              return allUpcoming.length > 0 ? allUpcoming.map(event => (
                 <div key={event.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <div className={`p-3 rounded-lg ${event.type === 'HOLIDAY' ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-600'}`}>
                     <Calendar size={20}/>
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-800">{event.title}</h4>
-                    <p className="text-xs text-slate-500">{event.date} • {event.isWorkingDay ? 'Día Laborable' : 'No Laborable'}</p>
+                    <p className="text-xs text-slate-500">{event.date} • {event.type === 'HOLIDAY' ? 'Feriado' : 'Evento'}</p>
                   </div>
                 </div>
-              ))}
-              {(!data.calendarEvents || data.calendarEvents.filter(e => new Date(e.date) >= new Date()).length === 0) && (
+              )) : (
                 <p className="text-slate-500 italic text-sm">No hay eventos próximos.</p>
-              )}
+              );
+            })()}
           </div>
         </div>
       </div>

@@ -58,6 +58,14 @@ class CloudinaryUploadService {
     folder: string = 'corpocrea',
     onProgress?: (percent: number) => void
   ): Promise<UploadResult> {
+    // If no token, try direct upload to Cloudinary (unsigned)
+    if (!this.token) {
+      const config = await this.getConfig();
+      if (config.configured && config.uploadPreset) {
+        return this.uploadDirect(file, config.cloudName, config.uploadPreset, folder, onProgress);
+      }
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 

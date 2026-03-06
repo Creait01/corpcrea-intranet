@@ -78,6 +78,8 @@ model EventItem {
   date        String
   location    String @default("")
   description String @default("")
+  imageUrl    String? @map("image_url")
+  videoUrl    String? @map("video_url")
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("events")

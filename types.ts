@@ -144,6 +144,8 @@ export interface EventItem {
   date: string;
   location: string;
   description: string;
+  imageUrl?: string;
+  videoUrl?: string;
 }
 
 export interface Employee {

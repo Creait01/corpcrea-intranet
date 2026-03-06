@@ -16,9 +16,9 @@ router.get('/', async (_req, res) => {
 // POST /api/events
 router.post('/', authMiddleware, requireRole('CEO', 'MANAGER', 'CONTENT_MANAGER'), async (req, res) => {
     try {
-        const { title, date, location, description } = req.body;
+        const { title, date, location, description, imageUrl, videoUrl } = req.body;
         const item = await prisma.eventItem.create({
-            data: { title, date, location: location || '', description: description || '' },
+            data: { title, date, location: location || '', description: description || '', imageUrl: imageUrl || null, videoUrl: videoUrl || null },
         });
         res.status(201).json(item);
     }

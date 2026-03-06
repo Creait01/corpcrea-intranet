@@ -293,7 +293,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
         title: newEvent.title!,
         description: newEvent.description || '',
         location: newEvent.location || 'Oficinas Centrales',
-        date: newEvent.date!
+        date: newEvent.date!,
+        imageUrl: newEvent.imageUrl || undefined,
+        videoUrl: newEvent.videoUrl || undefined
       });
       setNewEvent({ title: '', description: '', location: '', date: '' });
     }
@@ -767,7 +769,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
             <>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800"><Plus className="text-blue-600"/> Crear Evento</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4 items-start">
                   <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del evento</label>
@@ -785,8 +787,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                             value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})}
                         />
                     </div>
-                  </div>
-                  <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Ubicación</label>
                         <input 
@@ -804,6 +804,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                         />
                     </div>
                   </div>
+
+                  {/* Right Column: Image / Video Uploader */}
+                  <div className="space-y-4">
+                    <CloudinaryUpload 
+                        label="Imagen del evento"
+                        accept="image/*"
+                        folder="corpocrea/events"
+                        currentUrl={newEvent.imageUrl || ''}
+                        onUpload={(result) => setNewEvent({...newEvent, imageUrl: result.url})}
+                    />
+                    <CloudinaryUpload 
+                        label="Video del evento (opcional)"
+                        accept="video/*"
+                        folder="corpocrea/events"
+                        currentUrl={newEvent.videoUrl || ''}
+                        onUpload={(result) => setNewEvent({...newEvent, videoUrl: result.url})}
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                     <button onClick={handleAddEvent} className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 flex items-center gap-2 font-medium">
@@ -819,11 +837,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ data, actions, onBack })
                  <div className="divide-y divide-slate-100">
                     {data.events.map(item => (
                     <div key={item.id} className="p-4 flex justify-between items-center hover:bg-slate-50">
+                        <div className="flex items-center gap-4">
+                        {item.imageUrl && (
+                            <img src={item.imageUrl} alt={item.title} className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-slate-200" />
+                        )}
                         <div>
-                        <h4 className="font-bold text-slate-800">{item.title}</h4>
-                        <div className="flex gap-4 text-xs text-slate-500 mt-1">
-                            <span className="flex items-center gap-1"><Calendar size={12}/> {item.date}</span>
-                            <span>{item.location}</span>
+                            <h4 className="font-bold text-slate-800">{item.title}</h4>
+                            <div className="flex gap-4 text-xs text-slate-500 mt-1">
+                                <span className="flex items-center gap-1"><Calendar size={12}/> {item.date}</span>
+                                <span>{item.location}</span>
+                            </div>
+                            {item.videoUrl && (
+                                <a href={item.videoUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-1 inline-block">🎬 Ver video</a>
+                            )}
                         </div>
                         </div>
                         <button onClick={() => actions.deleteEvent(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">

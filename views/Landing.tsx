@@ -214,18 +214,36 @@ export const Landing: React.FC<LandingProps> = ({ data, onNavigateLogin }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {data.events.map((event, idx) => (
-              <div key={event.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group hover:-translate-y-1" style={{ animationDelay: `${idx * 100}ms` }}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="bg-[#1D3C34]/10 text-[#1D3C34] p-3 rounded-xl group-hover:bg-[#1D3C34] group-hover:text-white transition-colors duration-300">
-                    <Calendar size={24} />
+              <div key={event.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100 group hover:-translate-y-1" style={{ animationDelay: `${idx * 100}ms` }}>
+                {event.imageUrl && (
+                  <div className="relative h-48 overflow-hidden">
+                    <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    <span className="absolute top-3 right-3 text-sm font-bold text-white bg-[#CBA052] px-3 py-1 rounded-full shadow-lg">{event.date}</span>
                   </div>
-                  <span className="text-sm font-bold text-[#CBA052] bg-[#CBA052]/10 px-3 py-1 rounded-full">{event.date}</span>
-                </div>
-                <h3 className="text-xl font-black text-[#25282A] mb-2 group-hover:text-[#1D3C34] transition-colors">{event.title}</h3>
-                <p className="text-slate-500 text-sm mb-5 leading-relaxed">{event.description}</p>
-                <div className="flex items-center text-sm text-slate-500">
-                  <div className="w-2 h-2 rounded-full bg-[#CBA052] mr-2 animate-pulse"></div>
-                  {event.location}
+                )}
+                <div className="p-6">
+                  {!event.imageUrl && (
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="bg-[#1D3C34]/10 text-[#1D3C34] p-3 rounded-xl group-hover:bg-[#1D3C34] group-hover:text-white transition-colors duration-300">
+                        <Calendar size={24} />
+                      </div>
+                      <span className="text-sm font-bold text-[#CBA052] bg-[#CBA052]/10 px-3 py-1 rounded-full">{event.date}</span>
+                    </div>
+                  )}
+                  <h3 className="text-xl font-black text-[#25282A] mb-2 group-hover:text-[#1D3C34] transition-colors">{event.title}</h3>
+                  <p className="text-slate-500 text-sm mb-5 leading-relaxed">{event.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-sm text-slate-500">
+                      <div className="w-2 h-2 rounded-full bg-[#CBA052] mr-2 animate-pulse"></div>
+                      {event.location}
+                    </div>
+                    {event.videoUrl && (
+                      <a href={event.videoUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#1D3C34] hover:text-[#CBA052] transition-colors flex items-center gap-1">
+                        ▶ Ver video
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

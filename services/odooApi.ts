@@ -183,10 +183,16 @@ class OdooApiService {
   /**
    * Realiza una petición a Odoo a través del proxy del servidor Express.
    * Esto evita problemas de CORS.
+   * Si no hay baseUrl, intenta cargar la config del servidor antes de fallar.
    */
   private async post<T>(endpoint: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
+    // Auto-load config from DB if not yet available
     if (!this.baseUrl) {
-      return { success: false, error: 'Odoo no está configurado. Ingrese la URL del servidor.' };
+      await this.loadFromServer();
+    }
+
+    if (!this.baseUrl) {
+      return { success: false, error: 'Odoo no está configurado. El administrador debe configurar la URL del servidor en el panel de administración.' };
     }
 
     try {
